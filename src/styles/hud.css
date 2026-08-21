@@ -1,0 +1,278 @@
+/* Robotics HUD, Sci-Fi Overlays, Telemetry & Terminal CLI */
+
+.studio-terminal-section {
+  padding: 20px 0 60px 0;
+}
+
+/* Expandable CLI Guide Accordion */
+.cli-guide-accordion {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.cli-guide-accordion[open] {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 4px 20px rgba(0, 229, 255, 0.08);
+}
+
+.cli-guide-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 600;
+  list-style: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.cli-guide-summary::-webkit-details-marker {
+  display: none;
+}
+
+.cli-guide-summary:hover {
+  background: rgba(0, 229, 255, 0.08);
+  color: var(--neon-cyan);
+}
+
+.cli-guide-summary-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cli-guide-summary-left svg {
+  color: var(--neon-cyan);
+  flex-shrink: 0;
+}
+
+.cli-guide-badge {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(0, 229, 255, 0.12);
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.cli-guide-content {
+  padding: 18px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-primary);
+}
+
+.cli-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.cli-guide-card {
+  background: var(--metric-card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.cli-guide-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cli-guide-card-title.ai { color: var(--neon-green); }
+.cli-guide-card-title.sim { color: var(--neon-cyan); }
+.cli-guide-card-title.ros { color: #eab308; }
+.cli-guide-card-title.util { color: #a855f7; }
+
+.cli-guide-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.cli-guide-list li code {
+  color: var(--neon-green);
+  background: rgba(0, 255, 157, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.cli-guide-list kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  background: #27272a;
+  color: #ffffff;
+  border: 1px solid #3f3f46;
+  border-radius: 4px;
+}
+
+/* Interactive ROS2 /dev/robot_cli Terminal Section */
+.terminal-wrapper {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glow);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 30px var(--neon-green-dim);
+  transition: all 0.3s ease;
+}
+
+.terminal-header {
+  background: var(--bg-secondary);
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.3s ease;
+}
+
+.ai-terminal-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot-red { background: #ef4444; }
+.dot-yellow { background: #f59e0b; }
+.dot-green { background: var(--neon-green); }
+
+.terminal-path {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.terminal-body {
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 300px;
+  max-height: 480px;
+  overflow-y: auto;
+  color: var(--terminal-text);
+  background: var(--terminal-bg);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.terminal-body .term-output {
+  margin-bottom: 12px;
+}
+
+.terminal-body .term-highlight {
+  color: var(--neon-green);
+}
+
+.terminal-body .term-green {
+  color: var(--neon-green);
+}
+
+.terminal-body .term-cyan {
+  color: var(--neon-cyan);
+}
+
+.terminal-body .term-amber {
+  color: var(--neon-amber);
+}
+
+.terminal-body .term-coral {
+  color: var(--neon-coral);
+}
+
+.terminal-input-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.terminal-prompt-symbol {
+  color: var(--terminal-prompt, var(--neon-green));
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.terminal-input-elem {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--terminal-text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  outline: none;
+}
+
+/* Theory Modal Content Styling */
+.theory-card-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 16px;
+  transition: background 0.3s ease;
+}
+
+.theory-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.theory-math-block {
+  background: #040508;
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #a5f3fc;
+  margin: 12px 0;
+  overflow-x: auto;
+}
+
+.theory-code-block {
+  background: #040508;
+  border: 1px solid rgba(0, 255, 157, 0.25);
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: #86efac;
+  overflow-x: auto;
+}

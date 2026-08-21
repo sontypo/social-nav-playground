@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dracula_vampire">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SocialNav Studio | Interactive Physics &amp; Proxemics Simulation Engine</title>
+  <meta name="description" content="State-of-the-art interactive Social Robot Navigation &amp; Proxemics Simulation Studio featuring real-time physics, Hall's Proxemics costmaps, ROS2 bridge streaming, and terminal CLI.">
+  <meta name="theme-color" content="#191a21">
+
+  <!-- Favicon & Browser Icons -->
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="alternate icon" href="./favicon.svg">
+  <link rel="apple-touch-icon" href="./favicon.svg">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="SocialNav Studio | Interactive Physics &amp; Proxemics Simulation Engine">
+  <meta property="og:description" content="Explore real-time Social Navigation physics, Hall's Proxemics, and ROS2 telemetry in an interactive web simulation studio.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <script type="module" crossorigin src="./assets/index-b3lW3ZMs.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CdlcZgak.css">
+</head>
+<body>
+
+  <!-- Retro Minimalist Boot & Loading Sequence -->
+  <div id="retro-boot-screen" class="retro-boot-overlay">
+    <div class="boot-crt-scanlines"></div>
+    <div class="boot-container minimal">
+      <div class="boot-radar-logo">
+        <svg width="68" height="68" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="30" stroke="var(--neon-green)" stroke-width="1.5" stroke-dasharray="4 3" class="spin-slow" opacity="0.6"/>
+          <circle cx="32" cy="32" r="22" stroke="var(--neon-cyan)" stroke-width="1.5" opacity="0.8"/>
+          <circle cx="32" cy="32" r="14" stroke="#eab308" stroke-width="1" stroke-dasharray="2 2"/>
+          <line x1="32" y1="2" x2="32" y2="62" stroke="var(--neon-green)" stroke-width="0.75" opacity="0.3"/>
+          <line x1="2" y1="32" x2="62" y2="32" stroke="var(--neon-green)" stroke-width="0.75" opacity="0.3"/>
+          <!-- AMR Robot Center -->
+          <rect x="25" y="25" width="14" height="14" rx="3" fill="rgba(0, 255, 157, 0.2)" stroke="var(--neon-green)" stroke-width="1.8"/>
+          <circle cx="32" cy="32" r="3" fill="#ffffff"/>
+          <!-- Radar sweep line -->
+          <line x1="32" y1="32" x2="54" y2="10" stroke="var(--neon-cyan)" stroke-width="2" stroke-linecap="round" class="radar-sweep"/>
+        </svg>
+      </div>
+      <div class="boot-brand-name">SOCIAL<span style="color: var(--neon-green);">.NAV</span></div>
+      <div class="boot-brand-sub">STUDIO // v2.5</div>
+
+      <div class="boot-progress-wrap">
+        <div class="boot-progress-track">
+          <div class="boot-progress-fill" id="boot-progress-bar" style="width: 15%;"></div>
+        </div>
+        <div class="boot-progress-info">
+          <span class="boot-status-msg" id="boot-status-text">INITIALIZING ENGINE...</span>
+          <span class="boot-percent" id="boot-percent-text">15%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Cyber Background & HUD Canvas -->
+  <canvas id="bg-canvas"></canvas>
+  <div class="grid-bg-overlay"></div>
+  <div class="mouse-glow-light"></div>
+
+  <!-- Studio Top Navigation Header -->
+  <header class="navbar studio-navbar">
+    <div class="container nav-container">
+      <div class="nav-brand retro-nav-brand" title="SocialNav Studio | Interactive Robotics &amp; Proxemics Engine">
+        <div class="brand-icon retro-brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <!-- Radar concentric circles -->
+            <circle cx="12" cy="12" r="10" stroke="var(--neon-green)" stroke-width="1.5" stroke-dasharray="3 2" class="spin-slow" opacity="0.8"/>
+            <circle cx="12" cy="12" r="6" stroke="var(--neon-cyan)" stroke-width="1.5" opacity="0.9"/>
+            <circle cx="12" cy="12" r="2" fill="var(--neon-green)"/>
+            <!-- AMR Radar beam -->
+            <line x1="12" y1="12" x2="19" y2="5" stroke="var(--neon-green)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-text-wrap">
+          <span class="brand-main-text">SOCIAL<span class="brand-nav-suffix">.NAV</span></span>
+          <span class="brand-sub-badge">v2.5 // PROXEMICS</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <a href="#sim-bottom-panel" class="nav-btn-action" id="btn-toggle-analytics-deck" title="Jump to Real-Time Telemetry &amp; Metrics Deck">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          Telemetry Gauges
+        </a>
+        <button class="nav-btn-action" id="header-btn-theory" title="Open Mathematical Formulations & Proxemics Theory">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          Theory &amp; Math
+        </button>
+        <a href="#terminal" class="nav-btn-action" title="Jump to Interactive CLI Terminal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          Terminal CLI
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Studio Cockpit Layout -->
+  <main class="studio-main-container">
+    
+    <!-- Hero / Intro Banner -->
+    <div class="studio-intro-wrap">
+      <div class="retro-tag">
+        <span class="retro-tag-icon">🕹️</span>
+        <span class="retro-tag-text">INTERACTIVE PHYSICS &amp; PROXEMICS ENGINE</span>
+        <span class="retro-tag-badge">READY</span>
+      </div>
+      <h1 class="studio-main-title retro-title">
+        <span class="retro-title-prefix">Live Social Navigation</span>
+        <span class="highlight retro-highlight">Playground</span>
+        <span class="retro-blink-cursor">_</span>
+      </h1>
+      <!-- Collapsible Overview Note -->
+      <details class="intro-extend-note">
+        <summary class="intro-extend-summary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span>System Overview &amp; Scope</span>
+          <span class="intro-extend-pill">EXPAND</span>
+        </summary>
+        <div class="intro-extend-content">
+          <p class="studio-main-subtitle" style="margin: 0;">
+            Real-time multi-agent crowd simulation and autonomous mobile robot motion planner studio. Explore <strong>Hall's Proxemics</strong>, compare DRL relational models against physical social forces, and stream live <strong>ROS2 Humble telemetry</strong> via WebSockets.
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Central Simulator Suite -->
+    <div class="sim-container-card" id="simulator-suite">
+      
+      <!-- Top Algorithm & Scenario Toolbar -->
+      <div class="sim-top-bar">
+        
+        <!-- Algorithm Tabs -->
+        <div class="sim-modes-tabs" id="algo-selection-tabs">
+          <button class="algo-tab-btn active" data-algo="sfm" title="Helbing Social Force Model with Anisotropic Personal Space & Passing on Right">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path></svg>
+            SFM (Social Force)
+          </button>
+          <button class="algo-tab-btn" data-algo="drl" title="Self-Attention Relational Graph DRL (SARL) with 1.5s Trajectory Anticipation">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            SARL (Graph DRL)
+          </button>
+          <button class="algo-tab-btn" data-algo="cadrl" title="MIT Value-Network Deep Reinforcement Learning with Reciprocal Avoidance">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            CADRL (MIT DRL)
+          </button>
+          <button class="algo-tab-btn" data-algo="social_mpc" title="Model Predictive Control with Receding Horizon Trajectory Spline Optimization">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            Social MPC
+          </button>
+          <button class="algo-tab-btn" data-algo="orca_social" title="Reciprocal Velocity Obstacles with Geometric Half-Plane Linear Programming">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Social-ORCA (RVO)
+          </button>
+          <button class="algo-tab-btn nonsocial" data-algo="nonsocial" title="Naive A* Planner treating humans as static hard obstacles">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Non-Social A*
+          </button>
+        </div>
+
+        <!-- Scenarios & Simulation Controls -->
+        <div class="sim-actions-group">
+          <div class="dataset-dropdown-wrap">
+            <select class="sim-dataset-select" id="dataset-scenario-select" title="Select Public Crowd Benchmark Scenario">
+              <optgroup label="🏛️ Classical ETH / UCY Benchmarks">
+                <option value="eth_univ">🎓 Dataset: ETH Univ (Diagonal Streams)</option>
+                <option value="eth_hotel">🏨 Dataset: ETH Hotel (Sidewalk &amp; Tram Stop)</option>
+                <option value="ucy_zara">🛍️ Dataset: UCY Zara-01 (Two-Way Flow)</option>
+              </optgroup>
+              <optgroup label="🤖 Mobile Robot &amp; Multi-Modal Datasets">
+                <option value="jrdb_quad">🤖 Dataset: JRDB Quad (JackRabbot Campus Plaza)</option>
+                <option value="jrdb_atrium">🏛️ Dataset: JRDB CS Atrium (Indoor Crowds)</option>
+                <option value="scand_plaza">🐕 Dataset: SCAND Plaza (Spot &amp; Jackal AMR)</option>
+                <option value="thor_mocap">🔬 Dataset: THÖR MoCap (Shared Lab Corridor)</option>
+                <option value="atc_mall">🏬 Dataset: ATC Mall (Kyoto 3D LiDAR Crowds)</option>
+                <option value="sdd_coupa">🌲 Dataset: SDD Coupa (Stanford Drone Multi-Stream)</option>
+                <option value="ind_urban">🚗 Dataset: inD Urban (Shared Space Intersection)</option>
+              </optgroup>
+              <optgroup label="🧩 Interactive Simulation Scenarios">
+                <option value="synthetic">🌐 Scenario: Synthetic Hallway (Pillars)</option>
+                <option value="bottleneck">🚪 Scenario: Hospital Corridor (Bottleneck)</option>
+                <option value="doorway">🔄 Scenario: 90° Corner &amp; Doorway (Yielding)</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <button class="sim-btn-ctrl" id="btn-upload-dataset" title="Upload custom ETH/UCY trajectory file (.txt or .csv)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Upload Data
+          </button>
+          <input type="file" id="input-dataset-file" accept=".txt,.csv,.json" style="display: none;">
+
+          <button class="sim-btn-ctrl" id="btn-toggle-costmap" title="Toggle Dynamic 2D Social Costmap Grid (nav_msgs/OccupancyGrid)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+            Costmap Layer
+          </button>
+
+          <div style="position: relative; display: inline-flex; align-items: stretch;">
+            <button class="sim-btn-ctrl active" id="btn-toggle-lidar" title="Toggle 2D LiDAR Raycasting &amp; Point Cloud" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+              LiDAR Raycast
+            </button>
+            <button class="sim-btn-ctrl-sub" id="btn-lidar-settings" title="Configure LiDAR Ray Count, Range &amp; FoV" aria-label="LiDAR Settings">
+              ⚙️
+            </button>
+
+            <!-- Floating Quick Settings Popover -->
+            <div class="lidar-settings-popover" id="lidar-settings-popover">
+              <div class="lidar-popover-header">
+                <span>📡 2D LiDAR PARAMETERS</span>
+                <button type="button" id="btn-close-lidar-popover" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:12px;">✕</button>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:10px; margin-bottom:2px;">
+                  <span style="color:var(--text-secondary);">Ray Count:</span>
+                  <span style="color:#00D2FF; font-weight:700;" id="pop-val-lidar-rays">360 rays</span>
+                </div>
+                <input type="range" class="sim-slider blue" id="pop-slider-lidar-rays" min="18" max="720" step="18" value="360">
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:10px; margin-bottom:2px;">
+                  <span style="color:var(--text-secondary);">Max Range:</span>
+                  <span style="color:#00D2FF; font-weight:700;" id="pop-val-lidar-range">6.0 m</span>
+                </div>
+                <input type="range" class="sim-slider blue" id="pop-slider-lidar-range" min="1.0" max="12.0" step="0.5" value="6.0">
+              </div>
+
+              <div>
+                <div style="font-family:var(--font-mono); font-size:10px; color:var(--text-secondary); margin-bottom:4px;">Scan Angle / FoV:</div>
+                <div class="lidar-fov-grid">
+                  <button type="button" class="lidar-fov-btn active" data-fov="360">360°</button>
+                  <button type="button" class="lidar-fov-btn" data-fov="270">270°</button>
+                  <button type="button" class="lidar-fov-btn" data-fov="180">180°</button>
+                  <button type="button" class="lidar-fov-btn" data-fov="120">120°</button>
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border-color); padding-top:6px; font-family:var(--font-mono); font-size:9.5px;">
+                <label style="display:inline-flex; align-items:center; gap:4px; color:var(--text-secondary); cursor:pointer;">
+                  <input type="checkbox" id="pop-chk-lidar-rays" checked style="accent-color:#00D2FF;"> Beams
+                </label>
+                <label style="display:inline-flex; align-items:center; gap:4px; color:var(--text-secondary); cursor:pointer;">
+                  <input type="checkbox" id="pop-chk-lidar-points" checked style="accent-color:#00D2FF;"> Hits
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <button class="sim-btn-ctrl active" id="btn-toggle-heatmap" title="Toggle Hall's Proxemics Gaussian Heatmaps">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            Proxemics
+          </button>
+
+          <button class="sim-btn-ctrl active" id="btn-toggle-vectors" title="Toggle Pedestrian Velocity &amp; Force Vectors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            Vectors
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Canvas Viewport & Floating Interactive Tool Palette -->
+      <div class="sim-viewport-wrapper">
+        
+        <!-- Floating Interactive Tool Palette -->
+        <div class="sim-tool-palette" id="sim-tool-palette">
+          <div class="tool-palette-header">TOOLS</div>
+          <button class="tool-btn active" data-tool="drag" title="Select &amp; Drag (Goal, Robot, Pillars)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path></svg>
+            <span>Drag / Select</span>
+          </button>
+          <button class="tool-btn" data-tool="rotate" title="Rotate Entity (Drag around Robot, Human, Barrier, or Polygon to rotate orientation)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+            <span>Rotate Entity</span>
+          </button>
+          <button class="tool-btn" data-tool="spawn_ped" title="Click anywhere on canvas to spawn a moving human">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>Spawn Human</span>
+          </button>
+          <button class="tool-btn" data-tool="add_object" id="btn-tool-add-object" title="Add Obstacle Object (Click to configure Pillar radius or Box dimensions)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><circle cx="17.5" cy="6.5" r="3.5"></circle><path d="M12 12v9m-4.5-4.5h9"></path></svg>
+            <span>Add Object</span>
+          </button>
+
+          <!-- Floating Add Object Parameters Popover Panel (Zero Canvas Layout Shift) -->
+          <div class="tool-subpanel floating-popover" id="add-object-subpanel">
+            <div class="subpanel-header">
+              <div class="subpanel-title-wrap">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><circle cx="17.5" cy="6.5" r="3.5"></circle><path d="M12 12v9m-4.5-4.5h9"></path></svg>
+                <span>Add Static Object</span>
+              </div>
+              <button class="subpanel-btn-close" id="btn-obj-subpanel-close" title="Cancel &amp; Close">✕</button>
+            </div>
+
+            <div class="subpanel-type-tabs">
+              <button class="subpanel-tab active" type="button" data-objtype="circle" id="tab-obj-circle" title="Cylinder / Circle Pillar">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                <span>Pillar</span>
+              </button>
+              <button class="subpanel-tab" type="button" data-objtype="rect" id="tab-obj-rect" title="Box / Rectangular Barrier">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg>
+                <span>Box Barrier</span>
+              </button>
+            </div>
+
+            <!-- Pillar Controls -->
+            <div class="subpanel-inputs" id="subpanel-pillar-inputs">
+              <label class="subpanel-input-row" title="Pillar Cylinder Radius">
+                <span class="subpanel-label">Radius (R)</span>
+                <div class="subpanel-input-wrap">
+                  <input type="number" id="input-obj-radius" value="22" min="6" max="150" step="2" />
+                  <span class="subpanel-unit">px</span>
+                </div>
+              </label>
+            </div>
+
+            <!-- Box Barrier Controls -->
+            <div class="subpanel-inputs" id="subpanel-box-inputs" style="display: none;">
+              <label class="subpanel-input-row" title="Box Width">
+                <span class="subpanel-label">Width (W)</span>
+                <div class="subpanel-input-wrap">
+                  <input type="number" id="input-obj-width" value="60" min="10" max="300" step="5" />
+                  <span class="subpanel-unit">px</span>
+                </div>
+              </label>
+              <label class="subpanel-input-row" title="Box Length / Height">
+                <span class="subpanel-label">Length (L)</span>
+                <div class="subpanel-input-wrap">
+                  <input type="number" id="input-obj-height" value="30" min="10" max="300" step="5" />
+                  <span class="subpanel-unit">px</span>
+                </div>
+              </label>
+            </div>
+
+            <!-- Subpanel Action Buttons -->
+            <div class="subpanel-actions">
+              <button class="subpanel-action-btn cancel" id="btn-obj-cancel" type="button">Cancel</button>
+              <button class="subpanel-action-btn confirm" id="btn-obj-confirm" type="button">Place</button>
+            </div>
+          </div>
+          <button class="tool-btn" data-tool="gen_poly" title="Click canvas to generate a random geometric polygon obstacle (L-shapes, U-pockets, wedges, stars, multi-vertex polygons)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 8.5 4.5 20.5 19.5 20.5 22 8.5 12 2"></polygon><circle cx="12" cy="12" r="2"></circle></svg>
+            <span>Random Poly</span>
+          </button>
+          <button class="tool-btn" data-tool="set_goal" id="btn-tool-set-goal" title="Configure Single Goal or Multi-Waypoint Sequential Patrol">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle></svg>
+            <span>Set Goal</span>
+          </button>
+
+          <!-- Floating Set Goal Popover Panel (Single vs Multi-Waypoint Sequence) -->
+          <div class="tool-subpanel floating-popover" id="set-goal-subpanel" style="top: 140px;">
+            <div class="subpanel-header">
+              <div class="subpanel-title-wrap">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle></svg>
+                <span>Goal Navigation</span>
+              </div>
+              <button class="subpanel-btn-close" id="btn-goal-subpanel-close" title="Cancel &amp; Close">✕</button>
+            </div>
+
+            <div class="subpanel-type-tabs">
+              <button class="subpanel-tab active" type="button" data-goalmode="single" id="tab-goal-single" title="Single Navigation Goal Flag">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                <span>Single</span>
+              </button>
+              <button class="subpanel-tab" type="button" data-goalmode="multi" id="tab-goal-multi" title="Multi-Goal Sequential Waypoints Sequence">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                <span>Multi-WP</span>
+              </button>
+            </div>
+
+            <!-- Single Goal Instructions -->
+            <div class="subpanel-inputs" id="subpanel-single-goal-inputs">
+              <div class="subpanel-desc-text">Click anywhere on canvas to relocate the single target goal flag.</div>
+            </div>
+
+            <!-- Multi Waypoints Sequence Controls -->
+            <div class="subpanel-inputs" id="subpanel-multi-goal-inputs" style="display: none;">
+              <div class="subpanel-status-row">
+                <span class="subpanel-label">Patrol Waypoints:</span>
+                <span class="subpanel-val-badge" id="subpanel-wp-count">0 points</span>
+              </div>
+              <label class="subpanel-checkbox-row" title="Loop back to first waypoint when reaching final target">
+                <input type="checkbox" id="chk-wp-loop" checked />
+                <span>Continuous Loop Patrol</span>
+              </label>
+              <div class="subpanel-btn-group">
+                <button class="subpanel-action-btn-sm" id="btn-wp-clear" type="button" title="Clear all waypoints">🗑️ Clear WPs</button>
+                <button class="subpanel-action-btn-sm" id="btn-wp-reset-active" type="button" title="Reset sequence to WP 1">⏮️ WP 1</button>
+              </div>
+              <div class="subpanel-desc-text subpanel-hint">💡 Click canvas to append waypoints in order. Drag or delete waypoints anytime!</div>
+            </div>
+
+            <!-- Subpanel Action Buttons -->
+            <div class="subpanel-actions">
+              <button class="subpanel-action-btn cancel" id="btn-goal-cancel" type="button">Cancel</button>
+              <button class="subpanel-action-btn confirm" id="btn-goal-confirm" type="button">Set Goal</button>
+            </div>
+          </div>
+          <button class="tool-btn" data-tool="set_robot" title="Click canvas to relocate the AMR robot spawn point">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"></rect><circle cx="12" cy="12" r="3"></circle></svg>
+            <span>Set Robot</span>
+          </button>
+          <button class="tool-btn danger" data-tool="delete" title="Click any human pedestrian or obstacle to delete it from the world">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            <span>Delete Entity</span>
+          </button>
+
+          <div class="tool-palette-divider"></div>
+          <div class="tool-palette-header">SIM CONTROL</div>
+
+          <button class="tool-btn tool-action-btn" id="btn-sim-pause" title="Pause or Resume Simulation Loop">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+            <span id="btn-sim-pause-text">Pause Loop</span>
+          </button>
+
+          <button class="tool-btn tool-action-btn warning" id="btn-sim-reset" title="Reset World &amp; Entities">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+            <span>Reset World</span>
+          </button>
+
+          <div class="tool-palette-divider"></div>
+          <div class="tool-palette-header">EXPORT 3D</div>
+
+          <button class="tool-btn tool-action-btn" id="btn-export-gazebo-classic" title="Export current playground layout to Gazebo Classic 11 (.world) simulation file">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Gazebo (.world)</span>
+          </button>
+
+          <button class="tool-btn tool-action-btn" id="btn-export-gazebo-ign" title="Export current layout to Ignition Gazebo / Gazebo Sim (.sdf) file">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            <span>Ignition (.sdf)</span>
+          </button>
+        </div>
+
+        <!-- Canvas Viewport -->
+        <div class="sim-viewport">
+          <canvas id="sim-canvas"></canvas>
+          <div class="sim-canvas-overlay">
+            <div class="sim-hud-badge">
+              <span class="hud-fps-pill" id="hud-fps-val">60 FPS</span>
+              <span style="color: var(--text-muted); opacity: 0.5;">|</span>
+              <span id="active-tool-hint">Active Tool: Drag / Select • Drag pillars, robot, or goal flag</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Proxemics & Obstacles Grouped Legend Bar -->
+      <div class="sim-legend-bar">
+        <div class="legend-section">
+          <div class="legend-section-title">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="12 8 8 12 12 16 16 12 12 8"></polygon></svg>
+            Entities
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot robot"></div>
+            <span>AMR Robot</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot human"></div>
+            <span>Pedestrians</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot obstacle"></div>
+            <span>Pillars &amp; Barriers</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot goal"></div>
+            <span>Goal Target</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot lidar"></div>
+            <span>LiDAR 360°</span>
+          </div>
+        </div>
+
+        <div class="legend-section">
+          <div class="legend-section-title">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Proxemics &amp; Cost
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot intimate"></div>
+            <span>Intimate (&lt;0.45m)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot personal"></div>
+            <span>Personal (1.2m)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot social"></div>
+            <span>Social (3.6m)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot costmap"></div>
+            <span>Costmap Grid</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Telemetry Dials & Metric Cards with Embedded Real-Time Analytics -->
+      <div class="sim-bottom-panel" id="sim-bottom-panel">
+        
+        <!-- Left Column: Metrics & Live Mini Charts (Strictly Contained) -->
+        <div class="sim-panel-column metrics-column">
+          <div class="sim-metrics-bar-header">
+            <div class="metrics-bar-title">
+              <span class="status-dot-pulse"></span>
+              <span>TELEMETRY METRICS</span>
+              <span class="telemetry-rate-badge">12 Hz</span>
+            </div>
+            <div class="metrics-bar-actions">
+              <button class="mini-tool-btn" id="btn-analytics-pause" title="Pause / Resume Live Data Streaming">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                Pause
+              </button>
+              <button class="mini-tool-btn" id="btn-analytics-clear" title="Clear telemetry buffer">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Clear
+              </button>
+              <button class="mini-tool-btn primary" id="btn-analytics-csv" title="Export run telemetry to CSV">
+                CSV
+              </button>
+              <button class="mini-tool-btn" id="btn-analytics-json" title="Export telemetry to JSON">
+                JSON
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 Compact Interactive Metric Cards (Strict 2x2 Grid) -->
+          <div class="sim-metrics-grid">
+            
+            <!-- Card 1: Social Compliance (Area Chart) -->
+            <div class="metric-card chart-metric-card">
+              <div class="metric-card-header">
+                <span class="metric-label">Social Compliance</span>
+                <span class="metric-val" id="sim-metric-compliance" style="color: var(--neon-green);">98.4%</span>
+              </div>
+              <div class="card-chart-wrap">
+                <canvas id="chart-compliance-canvas" class="card-mini-canvas"></canvas>
+              </div>
+              <div class="metric-card-footer">
+                <span>Intimate Respect</span>
+                <span class="metric-sub-stat" id="card-stat-compliance-mean">μ: 98.2%</span>
+              </div>
+            </div>
+
+            <!-- Card 2: Personal Violations (Step Histogram) -->
+            <div class="metric-card chart-metric-card warning">
+              <div class="metric-card-header">
+                <span class="metric-label">Personal Violations</span>
+                <div class="metric-value-inline">
+                  <span class="metric-val" id="sim-metric-violations" style="color: var(--neon-coral);">0</span>
+                  <span class="metric-unit">ev</span>
+                </div>
+              </div>
+              <div class="card-chart-wrap">
+                <canvas id="chart-violations-canvas" class="card-mini-canvas"></canvas>
+              </div>
+              <div class="metric-card-footer">
+                <span>&lt;1.20m Breaches</span>
+                <span class="metric-sub-stat" id="card-stat-violations-mean">μ: 0.1</span>
+              </div>
+            </div>
+
+            <!-- Card 3: Min Distance to Human (3-Zone Proxemics Tracer) -->
+            <div class="metric-card chart-metric-card info">
+              <div class="metric-card-header">
+                <span class="metric-label">Min Distance to Human</span>
+                <span class="metric-val" id="sim-metric-mindist" style="color: var(--neon-cyan);">1.85m</span>
+              </div>
+              <div class="card-chart-wrap">
+                <canvas id="chart-mindist-canvas" class="card-mini-canvas"></canvas>
+              </div>
+              <div class="metric-card-footer">
+                <span>Hall's Zones (🔴|🟠|🟢)</span>
+                <span class="metric-sub-stat" id="card-stat-mindist-mean">μ: 2.10m</span>
+              </div>
+            </div>
+
+            <!-- Card 4: Comfort Index (Smooth Spline Waveform) -->
+            <div class="metric-card chart-metric-card">
+              <div class="metric-card-header">
+                <span class="metric-label">Comfort Index</span>
+                <span class="metric-val" id="sim-metric-comfort" style="color: #a855f7;">96.2%</span>
+              </div>
+              <div class="card-chart-wrap">
+                <canvas id="chart-comfort-canvas" class="card-mini-canvas"></canvas>
+              </div>
+              <div class="metric-card-footer">
+                <span>Trajectory Smoothness</span>
+                <span class="metric-sub-stat" id="card-stat-comfort-mean">μ: 95.8%</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right Column: Real-Time Parameter Sliders (Strictly Contained) -->
+        <div class="sim-panel-column controls-column">
+          <div class="sim-metrics-bar-header">
+            <div class="metrics-bar-title" style="color: var(--neon-cyan);">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              <span>SIMULATION PARAMETERS</span>
+            </div>
+            <div class="metrics-bar-actions">
+              <span class="telemetry-rate-badge" style="color: var(--neon-cyan);">LIVE TUNING</span>
+            </div>
+          </div>
+
+          <!-- 4 Stacked Live Tuning Panels -->
+          <div class="sim-tuning-stack">
+            <!-- Panel 1: Pedestrian Density -->
+            <div class="tuning-panel-card">
+              <div class="tuning-panel-header">
+                <div class="tuning-title-wrap">
+                  <span class="tuning-icon">👥</span>
+                  <span class="tuning-label">Pedestrian Crowd Density</span>
+                </div>
+                <span class="tuning-val-pill" id="val-pedestrians">7</span>
+              </div>
+              <div class="tuning-slider-row">
+                <span class="tuning-bound">2</span>
+                <input type="range" class="sim-slider" id="slider-pedestrians" min="2" max="20" value="7">
+                <span class="tuning-bound">20</span>
+              </div>
+              <div class="tuning-subtext">Active multi-agent crowd density in workspace</div>
+            </div>
+
+            <!-- Panel 2: Robot Max Speed -->
+            <div class="tuning-panel-card">
+              <div class="tuning-panel-header">
+                <div class="tuning-title-wrap">
+                  <span class="tuning-icon">⚡</span>
+                  <span class="tuning-label">Robot Maximum Velocity</span>
+                </div>
+                <span class="tuning-val-pill cyan" id="val-speed">1.2 m/s</span>
+              </div>
+              <div class="tuning-slider-row">
+                <span class="tuning-bound">0.4</span>
+                <input type="range" class="sim-slider" id="slider-speed" min="0.4" max="2.6" step="0.2" value="1.2">
+                <span class="tuning-bound">2.6</span>
+              </div>
+              <div class="tuning-subtext">AMR maximum translational velocity limit</div>
+            </div>
+
+            <!-- Panel 3: Courtesy Weight -->
+            <div class="tuning-panel-card">
+              <div class="tuning-panel-header">
+                <div class="tuning-title-wrap">
+                  <span class="tuning-icon">🤝</span>
+                  <span class="tuning-label">Courtesy Weight (Yielding)</span>
+                </div>
+                <span class="tuning-val-pill purple" id="val-courtesy">0.8</span>
+              </div>
+              <div class="tuning-slider-row">
+                <span class="tuning-bound">0.1</span>
+                <input type="range" class="sim-slider" id="slider-courtesy" min="0.1" max="2.0" step="0.1" value="0.8">
+                <span class="tuning-bound">2.0</span>
+              </div>
+              <div class="tuning-subtext">Social yielding preference in crossing encounters</div>
+            </div>
+
+            <!-- Panel 4: Proxemic Personal Buffer -->
+            <div class="tuning-panel-card">
+              <div class="tuning-panel-header">
+                <div class="tuning-title-wrap">
+                  <span class="tuning-icon">🛡️</span>
+                  <span class="tuning-label">Proxemic Personal Buffer</span>
+                </div>
+                <span class="tuning-val-pill coral" id="val-proxemics">1.2 m</span>
+              </div>
+              <div class="tuning-slider-row">
+                <span class="tuning-bound">0.6</span>
+                <input type="range" class="sim-slider" id="slider-proxemics" min="0.6" max="2.2" step="0.1" value="1.2">
+                <span class="tuning-bound">2.2</span>
+              </div>
+              <div class="tuning-subtext">Hall's personal conversational safety boundary</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ROS2 Bridge Live Streamer Deck -->
+      <div class="ros2-bridge-panel">
+        <div class="ros2-bridge-header">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div class="bridge-status-indicator" id="bridge-status-badge">
+              <span class="status-dot"></span>
+              <span id="bridge-status-text">ROS2 BRIDGE: STANDALONE (ws://localhost:9090)</span>
+            </div>
+            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);" id="bridge-packet-stat">
+              0 pkts sent
+            </span>
+          </div>
+
+          <div class="ros2-bridge-controls">
+            <input type="text" class="ws-url-input" id="bridge-ws-url" value="ws://localhost:9090" title="ROSBridge WebSocket URL">
+            <button class="btn-bridge-connect" id="btn-toggle-bridge">
+              Connect ROS2
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Topics Grid -->
+        <div class="ros2-topics-grid">
+          <div class="topic-stream-card">
+            <div class="topic-header-row">
+              <span style="color: var(--neon-green); font-weight: 600;">/robot_pose</span>
+              <span class="topic-msg-type">geometry_msgs/PoseStamped</span>
+            </div>
+            <div class="topic-coords-preview" id="preview-robot-pose">x: 0.00m, y: 0.00m, yaw: 0.00°</div>
+          </div>
+
+          <div class="topic-stream-card">
+            <div class="topic-header-row">
+              <span style="color: var(--neon-cyan); font-weight: 600;">/tracked_humans</span>
+              <span class="topic-msg-type" id="type-tracked-humans">geometry_msgs/PoseArray</span>
+            </div>
+            <div class="topic-coords-preview" id="preview-humans-pose">Tracking 7 active humans</div>
+          </div>
+
+          <div class="topic-stream-card">
+            <div class="topic-header-row">
+              <span style="color: #00D2FF; font-weight: 600;">/scan</span>
+              <span class="topic-msg-type" id="type-scan">sensor_msgs/LaserScan</span>
+            </div>
+            <div class="topic-coords-preview" id="preview-scan">LiDAR: 360 rays @ 6.00m</div>
+          </div>
+
+          <div class="topic-stream-card">
+            <div class="topic-header-row">
+              <span style="color: #eab308; font-weight: 600;">/goal_pose</span>
+              <span class="topic-msg-type">geometry_msgs/PoseStamped</span>
+            </div>
+            <div class="topic-coords-preview" id="preview-goal-pose">Target: x: 7.20m, y: 0.00m</div>
+          </div>
+
+          <div class="topic-stream-card">
+            <div class="topic-header-row">
+              <span style="color: #a855f7; font-weight: 600;">/social_costmap</span>
+              <span class="topic-msg-type">nav_msgs/OccupancyGrid (5Hz)</span>
+            </div>
+            <div class="topic-coords-preview" id="preview-costmap">Grid: 100x62 @ 0.20m res</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Embedded Interactive ROS2 Terminal Console -->
+    <section id="terminal" class="studio-terminal-section">
+      <div class="section-title-wrap" style="text-align: left; margin-bottom: 14px;">
+        <div class="section-tag">Direct Shell Control</div>
+        <h2 class="section-title" style="font-size: 1.5rem; margin-bottom: 0;">Interactive Robotics <span class="highlight">Terminal CLI</span></h2>
+      </div>
+
+      <!-- Collapsible / Expandable CLI Command Guide -->
+      <details class="cli-guide-accordion">
+        <summary class="cli-guide-summary">
+          <div class="cli-guide-summary-left">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            <span>📖 Interactive CLI Guide &amp; Command Cheatsheet (Click to expand / collapse)</span>
+          </div>
+          <span class="cli-guide-badge">QUICK CHEATSHEET</span>
+        </summary>
+
+        <div class="cli-guide-content">
+          <div class="cli-guide-grid">
+            <!-- Col 1: AI Assistant Commands -->
+            <div class="cli-guide-card">
+              <div class="cli-guide-card-title ai">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 3.3 2 6.1 4.9 7.3V19a2 2 0 0 0 2 2h2.2a2 2 0 0 0 2-2v-1.7A8 8 0 0 0 12 2z"></path><path d="M9 22h6"></path></svg>
+                AI Robotics Assistant (Zero-API)
+              </div>
+              <ul class="cli-guide-list">
+                <li><code>ai &lt;question&gt;</code>: Inquire about Proxemics, algorithms, or physics</li>
+                <li><code>ai analyze</code>: Evaluate real-time scene safety &amp; get recommendations</li>
+                <li><code>ai status</code>: Inspect active AI Core engine &amp; privacy metrics</li>
+                <li><code>ai why did robot slow down?</code>: Diagnose physical velocity reductions</li>
+              </ul>
+            </div>
+
+            <!-- Col 2: Simulation Control -->
+            <div class="cli-guide-card">
+              <div class="cli-guide-card-title sim">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                Simulation Physics &amp; Control (sim)
+              </div>
+              <ul class="cli-guide-list">
+                <li><code>sim status</code>: View live telemetry gauges &amp; robot metrics</li>
+                <li><code>sim pause</code> | <code>sim resume</code> | <code>sim reset</code>: Control execution loop</li>
+                <li><code>sim algo &lt;sfm|sarl|mpc|orca|cadrl|nonsocial&gt;</code>: Switch algorithm</li>
+                <li><code>sim scenario &lt;scand_plaza|jrdb_quad|eth_univ|...&gt;</code>: Load dataset</li>
+                <li><code>sim speed &lt;m/s&gt;</code> &amp; <code>sim courtesy &lt;0.1-2.0&gt;</code>: Tune speed &amp; yielding</li>
+                <li><code>sim spawn &lt;x&gt; &lt;y&gt;</code> &amp; <code>sim pillar &lt;x&gt; &lt;y&gt;</code>: Add dynamic entities</li>
+                <li><code>sim lidar &lt;on|off&gt;</code> &amp; <code>sim heatmap &lt;on|off&gt;</code>: Toggle sensor overlays</li>
+              </ul>
+            </div>
+
+            <!-- Col 3: ROS2 Ecosystem -->
+            <div class="cli-guide-card">
+              <div class="cli-guide-card-title ros">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+                ROS2 Ecosystem &amp; Topics
+              </div>
+              <ul class="cli-guide-list">
+                <li><code>ros2 topic list</code>: List active topics (/scan, /odom, /social_costmap)</li>
+                <li><code>ros2 topic echo &lt;topic&gt;</code>: Stream one live sensor_msgs payload frame</li>
+              </ul>
+            </div>
+
+            <!-- Col 4: Analytics & UI Themes -->
+            <div class="cli-guide-card">
+              <div class="cli-guide-card-title util">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                Analytics, Theory &amp; Utilities
+              </div>
+              <ul class="cli-guide-list">
+                <li><code>analytics stats</code>: Inspect compliance metrics &amp; violations summary</li>
+                <li><code>analytics csv</code> | <code>analytics json</code>: Export research trial logs</li>
+                <li><code>theory &lt;proxemics|algo|benchmarks|datasets&gt;</code>: Open math formulations</li>
+                <li><code>theme &lt;obsidian|tokyo|apollo|emerald|light|...&gt;</code>: Switch studio theme</li>
+                <li><code>clear</code>: Clear terminal screen | <kbd>↑</kbd>/<kbd>↓</kbd>: Navigate command history</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <div class="terminal-wrapper">
+        <div class="terminal-header">
+          <div class="ai-terminal-dots">
+            <div class="terminal-dot dot-red"></div>
+            <div class="terminal-dot dot-yellow"></div>
+            <div class="terminal-dot dot-green"></div>
+            <span class="terminal-path" style="margin-left: 10px;">/dev/robot_cli (ros2 humble / socialnav studio)</span>
+          </div>
+          <span class="badge badge-green">LIVE_SHELL</span>
+        </div>
+
+        <div class="terminal-body" id="terminal-body">
+          <div class="term-output">
+            <span class="term-highlight">======================================================================</span><br>
+            <span class="term-highlight">★ SOCIAL.NAV SIMULATION STUDIO — INTERACTIVE ROBOTICS CLI ★</span><br>
+            <span class="term-highlight">======================================================================</span><br>
+            Type <span class="term-cyan">'help'</span> for all commands, <span class="term-cyan">'sim status'</span> for current physics state, or <span class="term-cyan">'theory'</span>.
+          </div>
+
+          <div class="terminal-input-line">
+            <span class="terminal-prompt-symbol">robot@socialnav:~$</span>
+            <input type="text" class="terminal-input-elem" id="terminal-input" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Theory & Mathematical Formulations Modal -->
+  <div class="modal-backdrop" id="theory-modal-backdrop">
+    <div class="modal-dialog" style="max-width: 880px;">
+      <button class="modal-close-btn" id="modal-close-btn" aria-label="Close modal">✕</button>
+      
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <span class="section-tag" style="margin: 0;">Theory &amp; Formulations</span>
+        <span class="badge badge-cyan" id="modal-theory-badge">Social Robotics</span>
+      </div>
+
+      <h3 id="modal-title" style="font-size: 1.5rem; color: var(--heading-color, var(--text-primary)); margin-bottom: 8px;">Social Navigation Algorithms &amp; Hall's Proxemics</h3>
+      <p id="modal-desc" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">
+        Comprehensive mathematical definitions and implementation snippets powering the simulation engine.
+      </p>
+
+      <!-- Theory Tabs -->
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+        <button class="algo-tab-btn active theory-nav-btn" data-theory="proxemics">Hall's Proxemics</button>
+        <button class="algo-tab-btn theory-nav-btn" data-theory="sfm">Social Force (SFM)</button>
+        <button class="algo-tab-btn theory-nav-btn" data-theory="sarl">Relational Graph DRL (SARL)</button>
+        <button class="algo-tab-btn theory-nav-btn" data-theory="cadrl">MIT CADRL</button>
+        <button class="algo-tab-btn theory-nav-btn" data-theory="social_mpc">Social MPC</button>
+        <button class="algo-tab-btn theory-nav-btn" data-theory="orca_social">Social-ORCA (RVO)</button>
+        <button class="algo-tab-btn theory-nav-btn" data-theory="benchmarks">Benchmarks Table</button>
+      </div>
+
+      <div id="theory-content-body" style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; min-height: 240px;">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Toast Alert -->
+  <div class="toast" id="global-toast">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--neon-green)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <span id="toast-message">Notification message</span>
+  </div>
+
+  <!-- Floating Theme Customization Trigger (Bottom-Right) -->
+  <div class="theme-floating-wrapper" id="theme-floating-wrapper">
+    <div class="theme-popover" id="theme-popover">
+      <div class="theme-popover-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a4.5 4.5 0 0 0 0 9 4.5 4.5 0 0 1 0 9 10 10 0 0 0 0-18z"></path></svg>
+          <span style="font-weight: 700; font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase;">Studio Themes</span>
+        </div>
+        <button class="theme-popover-close" id="btn-close-theme-popover" aria-label="Close Theme Menu">✕</button>
+      </div>
+      <div class="theme-options-grid">
+        <div class="theme-group-title">🌙 Cyber &amp; Sci-Fi Dark</div>
+        
+        <button class="theme-option-btn active" data-theme="dracula_vampire">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #191a21; border: 1px solid #50FA7B;"></span>
+            <span class="theme-swatch" style="background: #50FA7B;"></span>
+            <span class="theme-swatch" style="background: #BD93F9;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Dracula Pro</span>
+            <span class="theme-desc">Midnight Violet &amp; Mint (Default)</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-option-btn" data-theme="obsidian">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #07080c; border: 1px solid #00FF9D;"></span>
+            <span class="theme-swatch" style="background: #00FF9D;"></span>
+            <span class="theme-swatch" style="background: #00E5FF;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Obsidian Matrix</span>
+            <span class="theme-desc">Cyberpunk Green &amp; Cyan</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-option-btn" data-theme="cyberpunk_neon">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #060709; border: 1px solid #FFE600;"></span>
+            <span class="theme-swatch" style="background: #FFE600;"></span>
+            <span class="theme-swatch" style="background: #00F0FF;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Cyberpunk 2077</span>
+            <span class="theme-desc">Electric Yellow &amp; Hyper Cyan</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-option-btn" data-theme="tokyo">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #0b0816; border: 1px solid #FF007F;"></span>
+            <span class="theme-swatch" style="background: #FF007F;"></span>
+            <span class="theme-swatch" style="background: #A855F7;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Tokyo Cyber</span>
+            <span class="theme-desc">Synthwave Magenta &amp; Purple</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-option-btn" data-theme="synthwave_sunset">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #0b071a; border: 1px solid #FF5722;"></span>
+            <span class="theme-swatch" style="background: #FF5722;"></span>
+            <span class="theme-swatch" style="background: #EC4899;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Synthwave Sunset</span>
+            <span class="theme-desc">Outrun Orange &amp; Fuchsia</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-option-btn" data-theme="apollo">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #030712; border: 1px solid #F59E0B;"></span>
+            <span class="theme-swatch" style="background: #F59E0B;"></span>
+            <span class="theme-swatch" style="background: #38BDF8;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Apollo Cosmos</span>
+            <span class="theme-desc">NASA Deep Space &amp; Gold</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-option-btn" data-theme="emerald">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #030d06; border: 1px solid #10B981;"></span>
+            <span class="theme-swatch" style="background: #10B981;"></span>
+            <span class="theme-swatch" style="background: #34D399;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Emerald CRT</span>
+            <span class="theme-desc">Vintage Phosphor Terminal</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-option-btn" data-theme="crimson_void">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #0a0304; border: 1px solid #FF1744;"></span>
+            <span class="theme-swatch" style="background: #FF1744;"></span>
+            <span class="theme-swatch" style="background: #FF9100;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Crimson Laser</span>
+            <span class="theme-desc">Sith Abyss &amp; Ruby Fire</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <div class="theme-group-title">📐 Technical &amp; Minimalist</div>
+
+        <button class="theme-option-btn" data-theme="nord_aurora">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #242933; border: 1px solid #88C0D0;"></span>
+            <span class="theme-swatch" style="background: #88C0D0;"></span>
+            <span class="theme-swatch" style="background: #A3BE8C;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Nord Arctic Frost</span>
+            <span class="theme-desc">Polar Slate &amp; Frost Cyan</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-option-btn" data-theme="cobalt_blueprint">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #0a192f; border: 1px solid #64FFDA;"></span>
+            <span class="theme-swatch" style="background: #64FFDA;"></span>
+            <span class="theme-swatch" style="background: #38BDF8;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">CAD Blueprint</span>
+            <span class="theme-desc">Architectural Cobalt &amp; Cyan</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-option-btn" data-theme="monochrome_minimal">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #0a0a0a; border: 1px solid #FFFFFF;"></span>
+            <span class="theme-swatch" style="background: #FFFFFF;"></span>
+            <span class="theme-swatch" style="background: #71717A;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Stark Monochrome</span>
+            <span class="theme-desc">High-Contrast Bauhaus White</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <div class="theme-group-title">☀️ Light &amp; Warm Themes</div>
+
+        <button class="theme-option-btn" data-theme="light">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #F8FAFC; border: 1px solid #2563EB;"></span>
+            <span class="theme-swatch" style="background: #2563EB;"></span>
+            <span class="theme-swatch" style="background: #0EA5E9;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Polar Laboratory</span>
+            <span class="theme-desc">Clean Blue &amp; Slate White</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-option-btn" data-theme="solar_light">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #FAF7F2; border: 1px solid #D97706;"></span>
+            <span class="theme-swatch" style="background: #D97706;"></span>
+            <span class="theme-swatch" style="background: #EA580C;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Solar Sand</span>
+            <span class="theme-desc">Warm Amber &amp; Desert Cream</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-option-btn" data-theme="coffee_latte">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #F5EBE0; border: 1px solid #9C5C2D;"></span>
+            <span class="theme-swatch" style="background: #9C5C2D;"></span>
+            <span class="theme-swatch" style="background: #C88A58;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Espresso Latte</span>
+            <span class="theme-desc">Warm Coffee &amp; Caramel Cream</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-option-btn" data-theme="sakura_light">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #FAF5FF; border: 1px solid #E11D48;"></span>
+            <span class="theme-swatch" style="background: #E11D48;"></span>
+            <span class="theme-swatch" style="background: #9333EA;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Neo Sakura</span>
+            <span class="theme-desc">Lilac Mist &amp; Rose Crimson</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+
+        <button class="theme-option-btn" data-theme="mint_light">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #F0FDF4; border: 1px solid #059669;"></span>
+            <span class="theme-swatch" style="background: #059669;"></span>
+            <span class="theme-swatch" style="background: #0D9488;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Eco Mint</span>
+            <span class="theme-desc">Nordic Fresh Emerald Frost</span>
+          </div>
+          <span class="theme-check">✓</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Floating Trigger Button (Bottom-Right) -->
+    <button class="theme-fab-btn" id="theme-fab-btn" title="Change Studio Theme" aria-label="Change Studio Theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+        <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+        <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+        <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+      </svg>
+      <span class="theme-fab-badge" id="theme-active-badge">Dracula</span>
+    </button>
+  </div>
+
+  <!-- Studio Footer -->
+  <footer style="border-top: 1px solid var(--border-color); padding: 24px 0; background: var(--bg-card); margin-top: 40px;">
+    <div class="container" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
+      <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);">
+        🤖 <span style="color: var(--text-primary); font-weight: 600;">SocialNav Studio</span> • Real-Time Social Navigation &amp; Proxemics Engine
+      </div>
+      <div style="display: flex; gap: 16px; font-family: var(--font-mono); font-size: 12px;">
+        <span style="color: var(--neon-green);">ROS2 Humble Ready</span>
+        <span style="color: var(--text-muted);">•</span>
+        <span style="color: var(--neon-cyan);">60 FPS Physics</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript Entry -->
+</body>
+</html>
