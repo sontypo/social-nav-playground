@@ -183,8 +183,7 @@ function initSimulatorSuite() {
     drag: 'Active Tool: Drag / Select • Drag pillars, boxes, polygons, waypoints, robot, or goal flag',
     rotate: 'Active Tool: Rotate Entity • Drag around robot, human, or obstacle to rotate orientation',
     spawn_ped: 'Active Tool: Spawn Human • Click anywhere on canvas to create moving pedestrian',
-    add_object: 'Active Tool: Add Object • Click canvas to place custom Pillar or Box barrier',
-    gen_poly: 'Active Tool: Random Poly • Click canvas to generate random scaled geometric obstacle',
+    add_object: 'Active Tool: Add Object • Click canvas to place Pillar, Box barrier, or Random Polygon',
     set_goal: 'Active Tool: Set Goal • Click canvas to relocate single goal or append sequential waypoints',
     set_robot: 'Active Tool: Set Robot • Click canvas to relocate AMR robot spawn',
     delete: 'Active Tool: Delete Entity • Click on any human pedestrian, obstacle, or waypoint to remove it'
@@ -205,21 +204,32 @@ function initSimulatorSuite() {
   // Add Object Subpanel Interaction
   const tabObjCircle = document.getElementById('tab-obj-circle');
   const tabObjRect = document.getElementById('tab-obj-rect');
+  const tabObjPoly = document.getElementById('tab-obj-poly');
+  const tabObjDrawPoly = document.getElementById('tab-obj-draw-poly');
   const subpanelPillarInputs = document.getElementById('subpanel-pillar-inputs');
   const subpanelBoxInputs = document.getElementById('subpanel-box-inputs');
+  const subpanelPolyInputs = document.getElementById('subpanel-poly-inputs');
+  const subpanelDrawPolyInputs = document.getElementById('subpanel-draw-poly-inputs');
+  const subpanelPolyVertexCount = document.getElementById('subpanel-poly-vertex-count');
+  const btnDrawPolyClear = document.getElementById('btn-draw-poly-clear');
+  const btnDrawPolyFinish = document.getElementById('btn-draw-poly-finish');
   const inputObjRadius = document.getElementById('input-obj-radius');
   const inputObjWidth = document.getElementById('input-obj-width');
   const inputObjHeight = document.getElementById('input-obj-height');
   const btnToolAddObject = document.getElementById('btn-tool-add-object');
 
   const updateObjectConfig = () => {
-    const isCircle = tabObjCircle?.classList.contains('active');
+    let type = 'circle';
+    if (tabObjRect?.classList.contains('active')) type = 'rect';
+    else if (tabObjPoly?.classList.contains('active')) type = 'poly';
+    else if (tabObjDrawPoly?.classList.contains('active')) type = 'draw_poly';
+
     const radius = Math.max(5, parseFloat(inputObjRadius?.value) || 22);
     const width = Math.max(10, parseFloat(inputObjWidth?.value) || 60);
     const height = Math.max(10, parseFloat(inputObjHeight?.value) || 30);
 
     simulator.setCustomObjectConfig({
-      type: isCircle ? 'circle' : 'rect',
+      type,
       radius,
       width,
       height
@@ -230,8 +240,12 @@ function initSimulatorSuite() {
     e.stopPropagation();
     tabObjCircle.classList.add('active');
     tabObjRect?.classList.remove('active');
+    tabObjPoly?.classList.remove('active');
+    tabObjDrawPoly?.classList.remove('active');
     if (subpanelPillarInputs) subpanelPillarInputs.style.display = 'flex';
     if (subpanelBoxInputs) subpanelBoxInputs.style.display = 'none';
+    if (subpanelPolyInputs) subpanelPolyInputs.style.display = 'none';
+    if (subpanelDrawPolyInputs) subpanelDrawPolyInputs.style.display = 'none';
     btnToolAddObject?.click();
     updateObjectConfig();
     showToast('Add Object: Pillar Cylinder mode');
@@ -241,11 +255,86 @@ function initSimulatorSuite() {
     e.stopPropagation();
     tabObjRect.classList.add('active');
     tabObjCircle?.classList.remove('active');
+    tabObjPoly?.classList.remove('active');
+    tabObjDrawPoly?.classList.remove('active');
     if (subpanelPillarInputs) subpanelPillarInputs.style.display = 'none';
     if (subpanelBoxInputs) subpanelBoxInputs.style.display = 'flex';
+    if (subpanelPolyInputs) subpanelPolyInputs.style.display = 'none';
+    if (subpanelDrawPolyInputs) subpanelDrawPolyInputs.style.display = 'none';
     btnToolAddObject?.click();
     updateObjectConfig();
     showToast('Add Object: Box Barrier mode');
+  });
+
+  tabObjPoly?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    tabObjPoly.classList.add('active');
+    tabObjCircle?.classList.remove('active');
+    tabObjRect?.classList.remove('active');
+    tabObjDrawPoly?.classList.remove('active');
+    if (subpanelPillarInputs) subpanelPillarInputs.style.display = 'none';
+    if (subpanelBoxInputs) subpanelBoxInputs.style.display = 'none';
+    if (subpanelPolyInputs) subpanelPolyInputs.style.display = 'flex';
+    if (subpanelDrawPolyInputs) subpanelDrawPolyInputs.style.display = 'none';
+    btnToolAddObject?.click();
+    updateObjectConfig();
+    showToast('Add Object: Random Geometric Polygon mode');
+  });
+
+  tabObjDrawPoly?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    tabObjDrawPoly.classList.add('active');
+    tabObjCircle?.classList.remove('active');
+    tabObjRect?.classList.remove('active');
+    tabObjPoly?.classList.remove('active');
+    if (subpanelPillarInputs) subpanelPillarInputs.style.display = 'none';
+    if (subpanelBoxInputs) subpanelBoxInputs.style.display = 'none';
+    if (subpanelPolyInputs) subpanelPolyInputs.style.display = 'none';
+    if (subpanelDrawPolyInputs) subpanelDrawPolyInputs.style.display = 'flex';
+    btnToolAddObject?.click();
+    updateObjectConfig();
+    showToast('Add Object: Draw Custom Boundary mode (Click canvas to add vertices)');
+  });
+
+  btnDrawPolyClear?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    simulator.clearCustomPolygonDraft();
+    showToast('Cleared polygon draft points');
+  });
+
+  btnDrawPolyFinish?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (simulator.customPolygonDraftPoints.length < 3) {
+      showToast('⚠️ Click at least 3 vertices on canvas before finishing');
+      return;
+    }
+    const obs = simulator.finishCustomPolygonDrawing();
+    if (obs) {
+      showToast(`✅ Created custom polygon with ${obs.points.length} vertices`);
+    }
+  });
+
+  simulator.onDraftPointsUpdated = (count) => {
+    if (subpanelPolyVertexCount) {
+      subpanelPolyVertexCount.textContent = `${count} points`;
+    }
+  };
+
+  window.addEventListener('keydown', (e) => {
+    if (simulator.activeTool === 'add_object' && simulator.customObjectConfig.type === 'draw_poly') {
+      if (e.key === 'Enter' || e.key === ' ') {
+        if (simulator.customPolygonDraftPoints.length >= 3) {
+          e.preventDefault();
+          const obs = simulator.finishCustomPolygonDrawing();
+          if (obs) {
+            showToast(`✅ Created custom polygon with ${obs.points.length} vertices`);
+          }
+        }
+      } else if (e.key === 'Escape') {
+        simulator.clearCustomPolygonDraft();
+        showToast('Cancelled polygon drawing');
+      }
+    }
   });
 
   inputObjRadius?.addEventListener('input', updateObjectConfig);
@@ -258,6 +347,7 @@ function initSimulatorSuite() {
   const btnToolDrag = document.querySelector('#sim-tool-palette .tool-btn[data-tool="drag"]');
 
   const closeSubpanelAndCancel = () => {
+    simulator.clearCustomPolygonDraft();
     if (addObjSubpanel) addObjSubpanel.classList.remove('visible');
     if (btnToolDrag) {
       btnToolDrag.click();
@@ -279,9 +369,19 @@ function initSimulatorSuite() {
   btnObjConfirm?.addEventListener('click', (e) => {
     e.stopPropagation();
     updateObjectConfig();
-    const isCircle = tabObjCircle?.classList.contains('active');
+    let label = 'Pillar';
+    if (tabObjRect?.classList.contains('active')) label = 'Box Barrier';
+    else if (tabObjPoly?.classList.contains('active')) label = 'Random Geometric Polygon';
+    else if (tabObjDrawPoly?.classList.contains('active')) {
+      if (simulator.customPolygonDraftPoints.length >= 3) {
+        simulator.finishCustomPolygonDrawing();
+        if (addObjSubpanel) addObjSubpanel.classList.remove('visible');
+        return;
+      }
+      label = 'Custom Polygon (Click canvas to add vertices)';
+    }
     if (addObjSubpanel) addObjSubpanel.classList.remove('visible');
-    showToast(`Ready: Click canvas to place ${isCircle ? 'Pillar' : 'Box'}`);
+    showToast(`Ready: ${label}`);
   });
 
   const addObjSubpanel = document.getElementById('add-object-subpanel');

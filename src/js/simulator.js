@@ -91,13 +91,19 @@ export class SocialNavSimulator {
     this.rotatingObstacle = null;
     this.lastRotateAngle = 0;
 
-    // Custom Object Configuration ('circle' | 'rect')
+    // Custom Object Configuration ('circle' | 'rect' | 'poly' | 'draw_poly')
     this.customObjectConfig = {
       type: 'circle',
       radius: 22,
       width: 60,
       height: 30
     };
+
+    // Custom Polygon Freehand / Click-to-Draw State
+    this.isDrawingCustomPolygon = false;
+    this.customPolygonDraftPoints = [];
+    this.draftCursorPos = null;
+    this.onDraftPointsUpdated = null;
 
     // Benchmark Scenarios: 'synthetic' | 'eth_univ' | 'ucy_zara' | 'bottleneck' | 'doorway' | 'custom'
     this.currentScenario = 'synthetic';
@@ -480,7 +486,9 @@ export class SocialNavSimulator {
     const posY = y !== null ? y : (this.canvas.height * 0.5 + (Math.random() - 0.5) * 150);
 
     let newObs;
-    if (cfg.type === 'rect') {
+    if (cfg.type === 'poly' || cfg.type === 'polygon' || cfg.type === 'random_poly') {
+      newObs = this.createRandomGeometry(posX, posY);
+    } else if (cfg.type === 'rect') {
       const w = Math.max(10, cfg.width || 60);
       const h = Math.max(10, cfg.height || 30);
       newObs = {
@@ -506,6 +514,159 @@ export class SocialNavSimulator {
 
     this.obstacles.push(newObs);
     return newObs;
+  }
+
+  finishCustomPolygonDrawing() {
+    if (!this.customPolygonDraftPoints || this.customPolygonDraftPoints.length < 3) {
+      return null;
+    }
+
+    const pts = this.customPolygonDraftPoints;
+    const len = pts.length;
+    let sumX = 0, sumY = 0;
+    for (let p of pts) {
+      sumX += p.x;
+      sumY += p.y;
+    }
+    const centerX = +(sumX / len).toFixed(2);
+    const centerY = +(sumY / len).toFixed(2);
+
+    const relPoints = pts.map(p => ({
+      x: +(p.x - centerX).toFixed(2),
+      y: +(p.y - centerY).toFixed(2)
+    }));
+
+    let maxR = 25;
+    for (let p of relPoints) {
+      const d = Math.hypot(p.x, p.y);
+      if (d > maxR) maxR = d;
+    }
+
+    const newObs = {
+      id: 'poly-' + Math.random().toString(36).substring(7),
+      type: 'polygon',
+      x: centerX,
+      y: centerY,
+      radius: +Math.max(15, maxR).toFixed(2),
+      scale: 1.0,
+      points: relPoints,
+      label: `CUSTOM POLY (${len}V)`
+    };
+
+    this.obstacles.push(newObs);
+    this.customPolygonDraftPoints = [];
+    this.isDrawingCustomPolygon = false;
+    this.draftCursorPos = null;
+
+    if (this.onDraftPointsUpdated) {
+      this.onDraftPointsUpdated(0);
+    }
+    if (this.onObjectPlaced) {
+      this.onObjectPlaced(newObs);
+    }
+    return newObs;
+  }
+
+  clearCustomPolygonDraft() {
+    this.customPolygonDraftPoints = [];
+    this.isDrawingCustomPolygon = false;
+    this.draftCursorPos = null;
+    if (this.onDraftPointsUpdated) {
+      this.onDraftPointsUpdated(0);
+    }
+  }
+
+  drawCustomPolygonDraft() {
+    if (!this.customPolygonDraftPoints || this.customPolygonDraftPoints.length === 0) return;
+
+    const pts = this.customPolygonDraftPoints;
+    const len = pts.length;
+    const curPos = this.draftCursorPos;
+    const isLight = ['light', 'solar_light', 'sakura_light', 'mint_light', 'coffee_latte'].includes(
+      document.documentElement.getAttribute('data-theme')
+    );
+
+    this.ctx.save();
+
+    // 1. Connecting polygon outline
+    this.ctx.beginPath();
+    this.ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < len; i++) {
+      this.ctx.lineTo(pts[i].x, pts[i].y);
+    }
+
+    // Dynamic guide line to cursor
+    let isNearFirst = false;
+    if (curPos) {
+      if (len >= 3 && Math.hypot(curPos.x - pts[0].x, curPos.y - pts[0].y) < 24) {
+        isNearFirst = true;
+        this.ctx.lineTo(pts[0].x, pts[0].y);
+      } else {
+        this.ctx.lineTo(curPos.x, curPos.y);
+      }
+    }
+
+    if (len >= 3) {
+      this.ctx.fillStyle = isLight ? 'rgba(2, 132, 199, 0.12)' : 'rgba(0, 229, 255, 0.15)';
+      this.ctx.fill();
+    }
+
+    this.ctx.strokeStyle = isLight ? '#0284c7' : '#00E5FF';
+    this.ctx.lineWidth = 2.2;
+    this.ctx.shadowColor = isLight ? 'rgba(2, 132, 199, 0.4)' : '#00E5FF';
+    this.ctx.shadowBlur = 10;
+    this.ctx.setLineDash([4, 4]);
+    this.ctx.stroke();
+    this.ctx.setLineDash([]);
+
+    // 2. Vertex Nodes
+    for (let i = 0; i < len; i++) {
+      const p = pts[i];
+      const isStart = i === 0;
+
+      // Glow Node
+      this.ctx.beginPath();
+      this.ctx.arc(p.x, p.y, isStart ? 6.5 : 4.5, 0, Math.PI * 2);
+      this.ctx.fillStyle = isStart ? '#00FF9D' : '#00E5FF';
+      this.ctx.shadowColor = isStart ? '#00FF9D' : '#00E5FF';
+      this.ctx.shadowBlur = 12;
+      this.ctx.fill();
+
+      // White Center
+      this.ctx.beginPath();
+      this.ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+      this.ctx.fillStyle = '#FFFFFF';
+      this.ctx.fill();
+
+      // Index Badge
+      this.ctx.font = '700 9px "JetBrains Mono", monospace';
+      this.ctx.textAlign = 'center';
+      this.ctx.textBaseline = 'bottom';
+      this.ctx.fillStyle = isStart ? '#00FF9D' : 'rgba(255, 255, 255, 0.85)';
+      this.ctx.shadowBlur = 0;
+      this.ctx.fillText(`V${i + 1}`, p.x, p.y - 8);
+    }
+
+    // 3. Snap to Start Indicator
+    if (isNearFirst) {
+      const t = Date.now() * 0.005;
+      const pulseR = 14 + Math.sin(t) * 4;
+      this.ctx.beginPath();
+      this.ctx.arc(pts[0].x, pts[0].y, pulseR, 0, Math.PI * 2);
+      this.ctx.strokeStyle = '#00FF9D';
+      this.ctx.lineWidth = 2;
+      this.ctx.shadowColor = '#00FF9D';
+      this.ctx.shadowBlur = 14;
+      this.ctx.stroke();
+
+      this.ctx.font = '700 9px "JetBrains Mono", monospace';
+      this.ctx.textAlign = 'center';
+      this.ctx.textBaseline = 'top';
+      this.ctx.fillStyle = '#00FF9D';
+      this.ctx.fillText('CLOSE POLYGON', pts[0].x, pts[0].y + 14);
+    }
+
+    this.ctx.restore();
   }
 
   addStaticPillar(x = null, y = null) {
@@ -786,8 +947,30 @@ export class SocialNavSimulator {
         return;
       }
 
-      // Tool mode: Add Object (Pillar or Box)
+      // Tool mode: Add Object (Pillar, Box, Random Poly, or Custom Polygon Boundary)
       if (this.activeTool === 'add_object' || this.activeTool === 'add_pillar') {
+        if (this.customObjectConfig.type === 'draw_poly') {
+          // Check if user clicks near the starting vertex to close polygon
+          if (this.customPolygonDraftPoints.length >= 3) {
+            const p0 = this.customPolygonDraftPoints[0];
+            if (Math.hypot(pos.x - p0.x, pos.y - p0.y) < 24) {
+              const obs = this.finishCustomPolygonDrawing();
+              return;
+            }
+          }
+
+          // Otherwise, append new vertex to the polygon
+          const lastPt = this.customPolygonDraftPoints[this.customPolygonDraftPoints.length - 1];
+          if (!lastPt || Math.hypot(pos.x - lastPt.x, pos.y - lastPt.y) > 6) {
+            this.customPolygonDraftPoints.push({ x: pos.x, y: pos.y });
+            this.isDrawingCustomPolygon = true;
+            if (this.onDraftPointsUpdated) {
+              this.onDraftPointsUpdated(this.customPolygonDraftPoints.length);
+            }
+          }
+          return;
+        }
+
         const obs = this.addCustomObject(pos.x, pos.y);
         if (this.onObjectPlaced) {
           this.onObjectPlaced(obs);
@@ -991,6 +1174,10 @@ export class SocialNavSimulator {
         this.draggedPedestrian.vx = 0;
         this.draggedPedestrian.vy = 0;
       }
+
+      if (this.activeTool === 'add_object' && this.customObjectConfig.type === 'draw_poly') {
+        this.draftCursorPos = pos;
+      }
     };
 
     const handleUp = () => {
@@ -1014,6 +1201,12 @@ export class SocialNavSimulator {
     this.canvas.addEventListener('mousedown', handleDown);
     this.canvas.addEventListener('mousemove', handleMove);
     window.addEventListener('mouseup', handleUp);
+
+    this.canvas.addEventListener('dblclick', () => {
+      if (this.activeTool === 'add_object' && this.customObjectConfig.type === 'draw_poly' && this.customPolygonDraftPoints.length >= 3) {
+        this.finishCustomPolygonDrawing();
+      }
+    });
 
     this.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleDown(e); }, { passive: false });
     this.canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handleMove(e); }, { passive: false });
@@ -1898,6 +2091,7 @@ export class SocialNavSimulator {
 
     // 3. Static Obstacles (Columns & Dividers)
     this.drawStaticObstacles();
+    this.drawCustomPolygonDraft();
 
     // 4. LiDAR Raycast Beams & Points
     if (this.showLidar) {

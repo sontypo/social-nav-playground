@@ -249,20 +249,21 @@
 /* Floating Add Object Popover Panel (No Canvas Layout Shift) */
 .tool-subpanel.floating-popover {
   position: absolute;
-  left: 148px;
-  top: 90px;
-  width: 190px;
+  left: 154px;
+  top: 88px;
+  width: 355px;
   z-index: 60;
   display: none;
   flex-direction: column;
-  gap: 7px;
-  padding: 10px 12px;
-  background: rgba(13, 17, 30, 0.95);
-  border: 1px solid rgba(0, 229, 255, 0.4);
-  border-radius: 10px;
-  backdrop-filter: blur(14px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 229, 255, 0.15);
+  gap: 11px;
+  padding: 14px 16px;
+  background: rgba(13, 17, 30, 0.97);
+  border: 1px solid rgba(0, 229, 255, 0.45);
+  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65), 0 0 18px rgba(0, 229, 255, 0.2);
   animation: fadeIn 0.18s ease;
+  box-sizing: border-box;
 }
 
 .tool-subpanel.floating-popover.visible {
@@ -270,9 +271,9 @@
 }
 
 [data-theme='light'] .tool-subpanel.floating-popover {
-  background: rgba(248, 250, 252, 0.96);
+  background: rgba(248, 250, 252, 0.98);
   border-color: #94a3b8;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.16);
 }
 
 .subpanel-header {
@@ -280,16 +281,16 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-color);
-  padding-bottom: 5px;
+  padding-bottom: 8px;
   margin-bottom: 2px;
 }
 
 .subpanel-title-wrap {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--neon-cyan);
 }
@@ -302,9 +303,9 @@
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
-  padding: 2px 5px;
+  padding: 2px 6px;
   border-radius: 4px;
   transition: all 0.15s ease;
 }
@@ -315,11 +316,13 @@
 }
 
 .subpanel-type-tabs {
-  display: flex;
-  gap: 4px;
-  background: rgba(0, 0, 0, 0.35);
-  padding: 2px;
-  border-radius: 6px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 4px;
+  border-radius: 8px;
+  box-sizing: border-box;
 }
 
 [data-theme='light'] .subpanel-type-tabs {
@@ -327,45 +330,56 @@
 }
 
 .subpanel-tab {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 4px 6px;
+  padding: 7px 3px;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: 6px;
   background: transparent;
   color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: 10px;
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.subpanel-tab svg {
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+  display: inline-block;
 }
 
 .subpanel-tab:hover {
   color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .subpanel-tab.active {
   background: var(--neon-cyan-glow);
   color: var(--neon-cyan);
-  border-color: rgba(0, 229, 255, 0.4);
+  border-color: rgba(0, 229, 255, 0.5);
   font-weight: 700;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
 }
 
 .subpanel-inputs {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 7px;
 }
 
 .subpanel-input-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  font-size: 10px;
+  gap: 8px;
+  font-size: 11px;
   font-family: var(--font-mono);
   color: var(--text-secondary);
 }
@@ -373,11 +387,11 @@
 .subpanel-input-wrap {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   background: rgba(0, 0, 0, 0.45);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 2px 4px;
+  border-radius: 6px;
+  padding: 3px 6px;
 }
 
 [data-theme='light'] .subpanel-input-wrap {
@@ -385,12 +399,12 @@
 }
 
 .subpanel-input-wrap input {
-  width: 44px;
+  width: 48px;
   background: transparent;
   border: none;
   color: var(--neon-cyan);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
   text-align: right;
   outline: none;
@@ -401,23 +415,27 @@
 }
 
 .subpanel-unit {
-  font-size: 9px;
+  font-size: 9.5px;
   color: var(--text-secondary);
 }
 
 .subpanel-actions {
   display: flex;
-  gap: 6px;
-  margin-top: 3px;
-  padding-top: 6px;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 8px;
   border-top: 1px solid var(--border-color);
 }
 
 .subpanel-desc-text {
-  font-size: 9.5px;
+  font-size: 10px;
   font-family: var(--font-mono);
   color: var(--text-secondary);
-  line-height: 1.35;
+  line-height: 1.45;
+  background: rgba(0, 229, 255, 0.05);
+  border: 1px dashed rgba(0, 229, 255, 0.25);
+  border-radius: 6px;
+  padding: 8px 10px;
 }
 
 .subpanel-hint {
