@@ -251,21 +251,6 @@ npm run build
 
 ---
 
-## 🎨 Customizable Themes & UI Styling
-
-SocialNav Studio features a curated cyber-robotics aesthetic with **Dracula Pro** set as the default theme:
-
-* 🧛 **Dracula Pro** (`dracula_vampire`) — *Default*
-* 🌃 **Tokyo Night** (`tokyo_night`)
-* ⚡ **Cyber Obsidian** (`cyber_obsidian`)
-* 🟣 **Monokai Pro** (`monokai_pro`)
-* ☀️ **Solarized Light** (`solar_light`)
-* 💎 **Nord Deep** (`nord_deep`)
-* 🌲 **Emerald Terminal** (`emerald_terminal`)
-* 🌅 **Cyberpunk Horizon** (`cyberpunk_horizon`)
-
----
-
 ## 📂 Project Directory Structure
 
 ```
