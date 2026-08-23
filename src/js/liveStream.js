@@ -2517,7 +2517,7 @@ export class LiveStreamManager {
     ctx.fillStyle = 'var(--neon-cyan)';
     ctx.font = '10px JetBrains Mono, monospace';
     ctx.fillText(`Points: ${ptCount.toLocaleString()} | Colormap: ${this.pointCloud.colormap.toUpperCase()}`, 26, 54);
-    ctx.fillText(`Orbit Dist: ${this.orbitCamera.distance.toFixed(1)}m | Pitch: ${(this.orbitCamera.pitch * 180 / Math.PI).toFixed(0)}°`, 26, 70);
+    ctx.fillText(`Orbit Dist: ${this.orbitCamera.distance.toFixed(1)}m | Pitch: ${(-this.orbitCamera.pitch * 180 / Math.PI).toFixed(0)}°`, 26, 70);
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
     ctx.font = '10px JetBrains Mono, monospace';
