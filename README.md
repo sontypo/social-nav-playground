@@ -2,14 +2,15 @@
 
 <div align="center">
 
-[![ROS2 Humble / Iron / Rolling](https://img.shields.io/badge/ROS2-Humble%20%7C%20Iron%20%7C%20Rolling-22314E?logo=ros&logoColor=white)](https://docs.ros.org/)
+[![ROS2 Humble / Iron / Jazzy](https://img.shields.io/badge/ROS2-Humble%20%7C%20Iron%20%7C%20Jazzy-22314E?logo=ros&logoColor=white)](https://docs.ros.org/)
 [![Physics Engine](https://img.shields.io/badge/Physics_Engine-HTML5_Canvas_60FPS-00D2FF?logo=html5&logoColor=white)](https://developer.mozilla.org/)
 [![3D Simulation](https://img.shields.io/badge/3D_Worlds-Gazebo_11_&_Ignition_SDF-FF6B6B?logo=gazebo&logoColor=white)](#-3d-gazebo-classic--ignition-gazebo-simulation-suite)
-[![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-50FA7B.svg)](LICENSE)
+[![Remote SSH Terminal](https://img.shields.io/badge/Remote_SSH-Interactive_Linux_PTY-c084fc?logo=gnometerminal&logoColor=white)](#-remote-ssh-robot-manager--interactive-terminal)
+[![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-50FA7B.svg)](LICENSE.txt)
 
-**A high-fidelity, web-native Social Robot Navigation Simulation Studio, Proxemics Costmap Lab, and ROS2 / RViz2 / Gazebo Digital Twin Suite.**
+**A high-fidelity, web-native Social Robot Navigation Simulation Studio, Proxemics Costmap Lab, Live ROS2 Telemetry / 3D PointCloud Visualizer, and Gazebo Digital Twin Suite.**
 
-[Features](#-key-features) • [Architecture](#-system-architecture) • [Quickstart](#-quickstart-guide) • [ROS2 & RViz2](#-ros2--rviz2-integration) • [Gazebo 3D Simulation](#-3d-gazebo-classic--ignition-gazebo-simulation-suite) • [Benchmark Datasets](#-public-crowd-trajectory-benchmarks) • [CLI Terminal](#-interactive-robotics-terminal-cli-devrobot_cli)
+[Live Demo & Modes](#-modes-of-operation) • [Key Features](#-key-features) • [System Architecture](#-system-architecture) • [Quickstart Guide](#-quickstart-guide) • [ROS2 & RViz2 Integration](#-ros2--rviz2-integration) • [SSH Remote Terminal](#-remote-ssh-robot-manager--interactive-terminal) • [Gazebo 3D Exporter](#-3d-gazebo-classic--ignition-gazebo-simulation-suite) • [Benchmark Datasets](#-public-crowd-trajectory-benchmarks)
 
 </div>
 
@@ -17,9 +18,32 @@
 
 ## 🌟 Overview
 
-**SocialNav Studio** is an open-source, interactive simulation environment and robotics prototyping laboratory designed for researchers, roboticists, and engineers working on **Human-Aware Robot Navigation**, **Social Force Models (SFM)**, **Proxemics Costmaps**, and **Deep Reinforcement Learning (DRL)**.
+**SocialNav Studio** is an open-source, dual-mode robotics prototyping studio designed for researchers, roboticists, and engineers working on **Human-Aware Robot Navigation**, **Social Force Models (SFM)**, **Proxemics Costmaps**, **Deep Reinforcement Learning (DRL)**, and **Live Physical Robot Teleoperation**.
 
-Built entirely with high-performance Vanilla ES6+ and 60 FPS HTML5 Canvas physics, it provides real-time multi-agent crowd dynamics, customizable 2D LiDAR raycasting, dynamic Proxemics costmap generation, bidirectional ROS2 WebSocket bridging, and one-click export to **Gazebo Classic 11 (`.world`)** and **Ignition Gazebo / Gazebo Sim (`.sdf`)** with authentic benchmark trajectories.
+The application operates in two synchronized modes:
+1. **Simulation Studio (`index.html`)**: Web-native 60 FPS crowd dynamics simulator, multi-agent physics, custom 2D LiDAR raycasting, Proxemics costmap generation, and one-click export to **Gazebo Classic 11 (`.world`)** and **Ignition Gazebo / Gazebo Sim (`.sdf`)**.
+2. **Live Hardware Stream Studio (`live.html`)**: Real-time ROS2 hardware visualizer supporting 3D LiDAR point clouds (Livox Mid-360, Velodyne, Ouster), RGB-D FPV cameras (ZED X, RealSense), 2D laser scans, automated ROS2 topic discovery, and an integrated **Interactive Remote SSH Linux Terminal**.
+
+---
+
+## 🎮 Modes of Operation
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                             🤖 SOCIALNAV STUDIO SUITE                            │
+├────────────────────────────────────────┬─────────────────────────────────────────┤
+│    🌐 MODE 1: SIMULATION STUDIO        │      📡 MODE 2: LIVE STREAM STUDIO      │
+│            (index.html)                │               (live.html)               │
+├────────────────────────────────────────┼─────────────────────────────────────────┤
+│ • 60 FPS Multi-Agent Crowd Physics     │ • 3D PointCloud Orbit View (RViz2 Like) │
+│ • SFM, SARL, CADRL, Social MPC, ORCA   │ • 2D Hardware Map & Odometry View       │
+│ • Edward T. Hall Proxemics Costmaps    │ • Livox Mid-360 / ZED X Camera Stream   │
+│ • Customizable 2D LiDAR Raycasting     │ • Auto-Detect & Remap ROS2 Topics       │
+│ • Multi-Goal Sequential Patrol Paths   │ • Real-Time Packet & Hz Rate Monitor    │
+│ • Export Gazebo 11 & Ignition SDF      │ • Built-in Remote SSH Interactive PTY   │
+│ • Public Benchmark Datasets (ETH/JRDB) │ • Instant 2D Nav Goal & Teleop Joystick │
+└────────────────────────────────────────┴─────────────────────────────────────────┘
+```
 
 ---
 
@@ -29,78 +53,94 @@ Built entirely with high-performance Vanilla ES6+ and 60 FPS HTML5 Canvas physic
 flowchart TB
     subgraph WebStudio["🌐 SocialNav Web Studio (Browser Client)"]
         CanvasPhysics["Canvas 2D Physics Engine\n• 60 FPS Multi-Agent Crowd Dynamics\n• Jackal Differential Drive AMR\n• Multi-Goal Sequential Patrol"]
-        Proxemics["Hall's Proxemics Engine\n• Intimate (0.45m), Personal (1.2m), Social (3.6m)\n• Asymmetric Gaussian Potential Grid (100x62)"]
-        LiDAR["Customizable 2D LiDAR Engine\n• 18-720 Rays | 1.0-12.0m Range | 120°-360° FoV\n• Real-Time Hit Point Cloud"]
-        WebBridge["ROS2 WebSocket Client\n(roslibjs @ ws://localhost:9090)"]
+        Proxemics["Hall's Proxemics Engine\n• Intimate (0.45m), Personal (1.2m), Social (3.6m)\n• Asymmetric Gaussian Potential Grid"]
+        Orbit3D["3D PointCloud Orbit Engine\n• REP 103 Right-Handed Coordinate Frame\n• Native Bit-Shift Base64 Decoder\n• Turbo / Intensity 256 Color LUTs"]
+        SSHTerm["SSH Remote Terminal Client\n• Real-Time Output Stream & Ctrl+C\n• Tab ROS2 Autocomplete\n• Topic Discovery & Latency Probe"]
+        WebBridge["ROS2 WebSocket Client\n(ws://localhost:9091 or 9090)"]
         GazeboExport["3D World Exporter Engine\n• Gazebo 11 (.world) & Ignition (.sdf)\n• Kinematic Speed Pacing (0.85-1.4 m/s)"]
     end
 
-    subgraph ROS2Middleware["📡 ROS2 Communication Middleware"]
-        RosbridgeServer["rosbridge_websocket_launch.xml\n(Port 9090 JSON RPC)"]
+    subgraph Middleware["📡 Communication Middleware"]
+        SSHGateway["SSH Gateway Daemon (Port 9092)\n• Zero-dependency Async Python\n• SSH_ASKPASS Password Auth\n• Local Port Forwarding Tunnel"]
+        RosbridgeServer["rosbridge_server WebSocket\n(Port 9091 / 9090 JSON RPC)"]
     end
 
-    subgraph NativeROS2["🤖 Native ROS2 Environment / Nodes"]
-        TFNode["TF Broadcaster & Marker Publisher\n(map -> base_link -> laser_link)"]
-        RViz2["RViz2 3D Visualizer\n• 2D Goal Pose / Initial Pose\n• LaserScan & OccupancyGrid"]
-        Nav2Nodes["Nav2 / External Controller\n(/cmd_vel Velocity Commands)"]
-    end
-
-    subgraph Gazebo3D["🏛️ 3D Simulation Engines"]
-        GazeboClassic["Gazebo Classic 11\n(.world with Animated <actor> Models)"]
-        IgnitionSim["Ignition Gazebo / Gazebo Sim\n(SDF 1.9 with Fuel 3D Meshes & z=+1.0m)"]
+    subgraph NativeROS2["🤖 Physical Robot / Simulation ROS2 Stack"]
+        TFNode["TF Broadcaster & Marker Publisher\n(map -> odom -> base_link -> laser_link)"]
+        Sensors["Sensors & Perception\n• Livox LiDAR / sensor_msgs/PointCloud2\n• ZED X / sensor_msgs/CompressedImage\n• 2D LaserScan / Nav2 Costmaps"]
+        Nav2Stack["Nav2 Navigation Stack\n(/cmd_vel & /goal_pose)"]
     end
 
     CanvasPhysics --> Proxemics
-    CanvasPhysics --> LiDAR
-    CanvasPhysics --> WebBridge
+    CanvasPhysics --> Orbit3D
     WebBridge <==>|"WebSocket (JSON)"| RosbridgeServer
+    SSHTerm <==>|"WebSocket (JSON/PTY)"| SSHGateway
+    SSHGateway <==>|"Encrypted SSH Channel"| NativeROS2
+    RosbridgeServer <==>|"Native DDS Topics"| Sensors
     RosbridgeServer <==>|"Native DDS Topics"| TFNode
-    RosbridgeServer <==>|"2D Goal / Initialpose"| RViz2
-    Nav2Nodes ==>|"/cmd_vel"| RosbridgeServer
-    TFNode ==> RViz2
-    GazeboExport --> GazeboClassic
-    GazeboExport --> IgnitionSim
+    Nav2Stack <==>|"Velocity Commands"| RosbridgeServer
+    GazeboExport --> NativeROS2
 ```
 
 ---
 
 ## ⚡ Key Features
 
-### 1. 🚶‍♂️ Interactive Multi-Agent Crowd Simulation
+### 1. 🌈 Real-Time 3D PointCloud & Hardware Visualizer (Live Stream Mode)
+* **Dual Viewport Modes**:
+  * **🌐 3D Orbit View**: Full 3D point cloud orbit camera with intuitive rotation (Left Drag), pan (Right Drag / Shift Drag), and zoom (Wheel) aligned with **ROS REP 103 Right-Handed coordinates** ($+X$ Forward, $+Y$ Left, $+Z$ Up).
+  * **🗺️ 2D Map View**: Overhead metric map view displaying SLAM OccupancyGrid (`/map`), Global/Local Costmaps, and Nav2 trajectory plans.
+* **High-Performance Decoding**:
+  * Native bit-shift `base64ToUint8Array` binary decoder operating at **60 FPS** with zero GC memory pressure.
+  * Pre-computed **Turbo Height LUT** and **Intensity LUT** (256-entry colormaps).
+  * Configurable **Persistence Decay** ($0\text{s}$ instant up to $5.0\text{s}$ dense map accumulation).
+* **Topic Inspector & Packet Monitor**:
+  * Real-time packet counter, bandwidth (kB/s), and update frequency (Hz) for every incoming ROS2 topic.
+  * **Auto Topic Discovery**: Queries active ROS2 topics from the robot, resolves types (`sensor_msgs/msg/PointCloud2`, `sensor_msgs/msg/CompressedImage`, `nav_msgs/msg/Odometry`), and auto-maps them to visualizer pipelines.
+  * **Dynamic Topic Manager**: Add custom topics on the fly or remove unwanted streams with instant $0\text{ms}$ canvas purging.
+  * **`[ 🧹 Clear ]` Tool**: One-click purge to clean all visualizer canvas layers (point clouds, scans, paths, trails, and humans).
+
+---
+
+### 2. 💻 Remote SSH Robot Manager & Interactive Terminal
+* **Zero-Dependency Python Gateway Daemon (`remote_ssh_manager.py`)**:
+  * Asynchronous WebSocket gateway running locally on `ws://localhost:9092`.
+  * Multi-profile credential manager supporting Password and SSH Key authentication.
+  * Headless password injection via `SSH_ASKPASS` provider (`askpass.py`), completely eliminating local PC terminal prompts.
+  * Automatic SSH port forwarding tunnel (`-L 9091:localhost:9091`) for seamless rosbridge bridging.
+* **Full-Featured Linux PC Terminal Console**:
+  * **Real-Time Streaming Output**: Streams live output line-by-line for continuous commands (`ros2 topic echo`, `ros2 topic hz`, `ping`, `colcon build`, `htop`).
+  * **`Ctrl + C` Interrupt (SIGINT)**: Interrupt any remote process instantly via the `Ctrl+C` keyboard shortcut or the `[ 🛑 Ctrl+C ]` UI button.
+  * **Tab Autocompletion**: Auto-completes standard ROS2 commands (`ros2 topic list -t`, `ros2 topic echo`, `ros2 node list`, `ros2 launch`, etc.).
+  * **Command History**: Navigate previous commands with `↑` and `↓` arrow keys.
+  * **Convenience Controls**: `[ 🧪 Test Connection ]` latency probing, `[ 📋 Copy Output ]`, and `[ 🧹 Clear ]`.
+
+---
+
+### 3. 🚶‍♂️ Interactive Multi-Agent Crowd Simulation (Simulation Mode)
 * **Real-time 60 FPS Physics**: Simulates autonomous crowd encounters, group walking, cross flows, bottle-necks, and reciprocal yielding.
-* **Jackal AMR Platform**: Differential drive mobile robot kinematics with continuous heading orientation and velocity integration.
+* **Jackal Differential Drive AMR**: Realistic kinematics with continuous orientation heading and velocity integration.
 * **Multi-Goal Sequential Waypoint Navigation**: Set and cycle through multi-goal patrol waypoints with loop modes and instant target switching.
 * **Interactive Tool Palette**: *Drag / Select*, *Spawn Human*, *Place Static Obstacle Pillar*, *Set Goal Flag*, and *Reposition Robot*.
 
-### 2. 🛡️ Hall's Proxemics & Asymmetric Gaussian Costmaps
+---
+
+### 4. 🛡️ Hall's Proxemics & Asymmetric Gaussian Costmaps
 * Visualizes Edward T. Hall's classic proxemics zones:
   * **Intimate Zone** ($r \le 0.45\text{m}$): Immediate physical boundary.
   * **Personal Zone** ($0.45\text{m} < r \le 1.20\text{m}$): Conversational and comfort space.
   * **Social Zone** ($1.20\text{m} < r \le 3.60\text{m}$): Interpersonal awareness area.
 * **Dynamic Asymmetric Gaussian Costmap**: Generates a continuous cost matrix ($100 \times 62$ cells @ $0.2\text{m}$ resolution) expanded in front of walking pedestrians to penalize cutting across human paths. Published in real time to `/social_costmap`.
 
-### 3. 📡 LiDAR Sensor Raycasting & Point Cloud
-* **Fully Customizable Parameters**:
-  * **Ray Count**: $18$ to $720$ beams (default: $360$ rays, $1^\circ$ resolution).
-  * **Max Range**: $1.0\text{m}$ to $12.0\text{m}$ (default: $6.0\text{m}$).
-  * **Field of View (FoV)**: $360^\circ$ (Omnidirectional), $270^\circ$, $180^\circ$, or $120^\circ$.
-  * **Display Modes**: Toggleable beam lines and electric azure / cobalt blue hit return points.
-* Live dynamic broadcasting to native ROS2 `sensor_msgs/msg/LaserScan` with synchronized `angle_min`, `angle_max`, and `ranges[]`.
+---
 
-### 4. 🧠 Multi-Algorithm Motion Planning Benchmark Suite
+### 5. 🧠 Multi-Algorithm Motion Planning Benchmark Suite
 * **Social Force Model (SFM)**: Helbing anisotropic socio-physical forces with right-hand passing bias.
 * **Relational Graph DRL (SARL)**: Spatio-temporal self-attention graph anticipating human trajectories $1.5\text{s}$ into the future.
 * **CADRL (MIT DRL)**: Value-network reciprocal multi-agent collision avoidance.
 * **Social MPC**: Receding-horizon trajectory optimizer with 12-stage prediction horizon and comfort penalty.
 * **Social-ORCA (RVO)**: Geometric half-plane velocity obstacle avoidance.
 * **Non-Social A\***: Baseline naive path planner ignoring pedestrian proxemics zones.
-
-### 5. 📊 Real-Time Telemetry & Safety Metrics
-* **Social Compliance %**: Percentage of navigation time spent outside all human personal spaces.
-* **Personal Space Violations**: Strict count and duration of human comfort intrusions.
-* **Minimum Separation Distance**: Closest encounter distance to any pedestrian ($2$ decimal places).
-* **Comfort Index**: Jerk and proxemic penalty integration score ($0 - 100\%$).
-* **Metric Robot Pose**: Accurate SI coordinates $(x, y, \theta)$ formatted to $2$ decimal places.
 
 ---
 
@@ -115,13 +155,7 @@ Export any 2D scenario, benchmark dataset, or custom playground layout directly 
 | **Actor $z$-Offset** | $z = 0.0\text{m}$ (Ground Plane) | $z = +1.0\text{m}$ (Torso Centered Offset) |
 | **Physics Setup** | ODE Physics Engine ($1000\text{Hz}$) | DART / Bullet Physics Plugin |
 | **Goal Representation**| 3D Beacon Pad & Glowing Pole | 3D Visual Beacon & Multi-Goal Markers |
-| **Robot Policy** | **Standalone 3D World** (Spawn robot via ROS2 launch file) | **Standalone 3D World** (Spawn robot via ROS2 launch file) |
-
-### 🏃 Kinematic Speed & Timestamp Pacing Engine
-* All exported `<actor>` trajectories are processed through a **Kinematic Speed Pacing Engine**:
-  * Normalizes walking speeds strictly between **$0.85\text{ m/s}$ and $1.40\text{ m/s}$**, perfectly synchronized with the standard `walk.dae` stride cycle to **eliminate foot-sliding (moonwalking)** or unrealistic sprinting.
-  * Calculates exact $\Delta t = \frac{d}{v_{\text{walk}}}$ for all waypoint transitions.
-  * Filters micro-jittering points ($< 5\text{cm}$) and generates smooth loop-closure return paths back to the starting point.
+| **Kinematic Pacing**| Strict $0.85 - 1.40\text{ m/s}$ (Eliminates foot-sliding) | Strict $0.85 - 1.40\text{ m/s}$ (Eliminates foot-sliding) |
 
 ```bash
 # Launch Gazebo Classic 11 Simulation:
@@ -135,7 +169,7 @@ Export any 2D scenario, benchmark dataset, or custom playground layout directly 
 
 ## 📊 Public Crowd Trajectory Benchmarks
 
-The project comes pre-loaded with genuine trajectory data from leading robotics and computer vision benchmarks located in `ros2_bridge/datasets/`:
+Pre-loaded with authentic trajectory datasets located in `ros2_bridge/datasets/`:
 
 | Dataset | Environment Description | Modality / Format | File Location |
 | :--- | :--- | :--- | :--- |
@@ -158,15 +192,15 @@ The project comes pre-loaded with genuine trajectory data from leading robotics 
 
 ## 📡 ROS2 & RViz2 Integration
 
-### 📤 Published Topics (Web Simulator $\rightarrow$ ROS2 / RViz2 @ 20 Hz)
+### 📤 Published Topics (Web $\rightarrow$ ROS2 @ 20 Hz)
 
 | Topic Name | Message Type | Description |
 | :--- | :--- | :--- |
 | `/robot_pose` | `geometry_msgs/msg/PoseStamped` | Real-time position $(x, y)$ and quaternion orientation of the AMR robot in frame `map`. |
-| `/odom` | `nav_msgs/msg/Odometry` | Simulated odometry feed with linear/angular velocities, position, and covariance in frame `odom` $\rightarrow$ `base_link`. |
+| `/odom` | `nav_msgs/msg/Odometry` | Simulated odometry feed with velocities, position, and covariance in frame `odom` $\rightarrow$ `base_link`. |
 | `/tracked_humans` | `geometry_msgs/msg/PoseArray` | Array of all active human pedestrian coordinates and heading orientations in frame `map`. |
-| `/scan` | `sensor_msgs/msg/LaserScan` | Configurable 2D LiDAR point cloud in frame `laser_link` ($18 - 720$ rays, $1.0 - 12.0\text{m}$ range, $120^\circ - 360^\circ$ FoV). |
-| `/social_costmap` | `nav_msgs/msg/OccupancyGrid` | 2D dynamic Social Costmap ($0.2\text{m/cell}$, asymmetric Gaussian proxemics + obstacle inflation @ 5 Hz). |
+| `/scan` | `sensor_msgs/msg/LaserScan` | Configurable 2D LiDAR point cloud in frame `laser_link` ($18 - 720$ rays, $1.0 - 12.0\text{m}$ range). |
+| `/social_costmap` | `nav_msgs/msg/OccupancyGrid` | 2D dynamic Social Costmap ($0.2\text{m/cell}$, asymmetric Gaussian proxemics @ 5 Hz). |
 | `/goal_pose` | `geometry_msgs/msg/PoseStamped` | Current target navigation destination coordinates in frame `map` (Bidirectional sync). |
 
 ### 📥 Subscribed Topics (RViz2 / External Nodes $\rightarrow$ Web Simulator)
@@ -216,7 +250,7 @@ theme <dracula | tokyo | obsidian | solar_light | ...>   # Switch studio color t
 
 ### Prerequisites
 * **Node.js** (v18.0+) & **npm**
-* *(Optional for ROS2 / RViz2)*: ROS2 Humble, Iron, or Rolling with `ros-humble-rosbridge-server`
+* *(Optional for ROS2)*: ROS2 Humble, Iron, or Jazzy with `ros-humble-rosbridge-server`
 
 ### 1. Clone & Run Web Studio Locally
 ```bash
@@ -230,21 +264,25 @@ npm install
 # 3. Start local development server (Vite @ port 5173)
 npm run dev
 ```
-Open your browser at **`http://localhost:5173/`**.
+* Main Simulation Studio: **`http://localhost:5173/`**
+* Live Hardware Stream Studio: **`http://localhost:5173/live.html`**
 
-### 2. Connect Native ROS2 & RViz2
-In separate terminals:
+### 2. Launching Live Stream & SSH Gateway
 ```bash
-# Terminal 1: Launch WebSocket Bridge (Port 9090)
-sudo apt install ros-humble-rosbridge-server
-ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+# Terminal 1: Launch Local SSH Bridge Daemon (Port 9092)
+./ros2_bridge/launch_ssh_bridge.sh
 
-# Terminal 2: Run TF Broadcaster & Launch RViz2
+# Terminal 2 (Optional Demo): Run synthetic 3D LiDAR & AMR telemetry node
+./ros2_bridge/launch_live_stream_demo.sh
+```
+
+### 3. Launching RViz2 Visualizer (For `Simulation Mode` only)
+```bash
 ./ros2_bridge/launch_visualizer.sh
 ```
 In the web studio, click **`Connect ROS2`** in the ROS2 Bridge deck. The status indicator will turn neon green (`ROS2 BRIDGE: CONNECTED`).
 
-### 3. Build Production Bundle
+### 4. Build Production Bundle
 ```bash
 npm run build
 ```
@@ -255,14 +293,18 @@ npm run build
 
 ```
 social-nav-playground/
-├── index.html                      # Main Studio Single-Page Application
+├── index.html                      # Main Studio Simulation & Scenario Editor
+├── live.html                       # Real-Time ROS2 Hardware Live Stream Studio
 ├── package.json                    # Project metadata & Vite build scripts
-├── vite.config.js                  # Vite configuration & dev server settings
+├── vite.config.js                  # Vite configuration & multi-page dev server settings
 ├── src/
 │   ├── js/
 │   │   ├── main.js                 # Application orchestrator & DOM bindings
 │   │   ├── simulator.js            # 60 FPS Canvas physics, AMR kinematics & SFM
-│   │   ├── ros2Bridge.js           # WebSocket bridge client (roslibjs)
+│   │   ├── liveStream.js           # Live ROS2 Telemetry, 3D Orbit & FPV Camera engine
+│   │   ├── pointcloudDecoder.js    # Binary PointCloud2 decoder, Turbo colormap & 3D camera
+│   │   ├── sshManager.js           # SSH Remote Robot Manager & Real-Time Interactive Terminal
+│   │   ├── ros2Bridge.js           # Bidirectional ROS2 WebSocket bridge client
 │   │   ├── gazeboExporter.js       # 3D Gazebo Classic (.world) & Ignition (.sdf) engine
 │   │   ├── terminal.js             # Interactive robotics CLI console engine
 │   │   ├── data.js                 # Mathematical formulations, benchmarks & documentation
@@ -270,25 +312,22 @@ social-nav-playground/
 │   └── styles/
 │       ├── main.css                # Dracula Pro design tokens & global typography
 │       ├── simulator.css           # Simulation canvas, HUD, toolbars & popovers
+│       ├── liveStream.css          # Live stream dashboard, 3D visualizer & SSH modal styling
 │       └── terminal.css            # Cyberpunk terminal console styling
 └── ros2_bridge/
     ├── README.md                   # ROS2 integration guide & dataset documentation
     ├── launch_visualizer.sh        # One-click RViz2 & TF broadcaster launcher
     ├── launch_gazebo_sim.sh        # Gazebo Classic & Ignition simulation launcher
+    ├── launch_live_stream_demo.sh  # Autonomous AMR & 16-beam 3D LiDAR demo publisher
+    ├── launch_ssh_bridge.sh        # Remote SSH Bridge Gateway & Tunnel Daemon launcher
+    ├── remote_ssh_manager.py       # Zero-dependency async Python WebSocket SSH server
+    ├── askpass.py                  # Headless SSH_ASKPASS credential provider
+    ├── live_stream_publisher.py    # Python ROS2 synthetic 3D LiDAR & telemetry node
     ├── social_subscriber_example.py# Python TF Broadcaster & 3D Marker node
     ├── social_robot_controller.py  # Python velocity controller node
     ├── gazebo_human_controller.py  # Standalone Gazebo actor controller node
     ├── social_nav.rviz             # Pre-configured RViz2 display profile
     └── datasets/                   # Genuine crowd trajectory benchmark files
-        ├── eth_univ_real.txt
-        ├── eth_hotel_sample.txt
-        ├── ucy_zara01_real.txt
-        ├── jrdb_quad_real.txt
-        ├── scand_plaza_real.txt
-        ├── thor_corridor_real.txt
-        ├── atc_mall_real.txt
-        ├── sdd_coupa_sample.txt
-        └── ind_intersection_real.txt
 ```
 
 ---

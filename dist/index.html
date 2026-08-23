@@ -4,6 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SocialNav Studio | Interactive Physics &amp; Proxemics Simulation Engine</title>
+
+  <!-- Instant Boot Screen Bypass on Mode Switching -->
+  <script>
+    try {
+      if (sessionStorage.getItem('socialnav_skip_boot') === 'true' || sessionStorage.getItem('socialnav_has_booted') === 'true') {
+        document.documentElement.classList.add('skip-boot-screen');
+      }
+    } catch (e) {}
+  </script>
+
   <meta name="description" content="State-of-the-art interactive Social Robot Navigation &amp; Proxemics Simulation Studio featuring real-time physics, Hall's Proxemics costmaps, ROS2 bridge streaming, and terminal CLI.">
   <meta name="theme-color" content="#191a21">
 
@@ -23,10 +33,31 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Stylesheets -->
-  <script type="module" crossorigin src="./assets/index-CGmHQz6N.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-B2BfRJud.css">
+  <script type="module" crossorigin src="./assets/main-Bo1l5H4F.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/ros2Bridge-DKnrOIdT.js">
+  <link rel="stylesheet" crossorigin href="./assets/ros2Bridge-Blf4Fx0K.css">
+  <link rel="stylesheet" crossorigin href="./assets/main-D25kFAXJ.css">
 </head>
 <body>
+
+  <!-- Cyber Mode Transition Screen Overlay -->
+  <div id="mode-transition-overlay" class="mode-transition-overlay">
+    <div class="transition-radar-wrap">
+      <svg width="72" height="72" viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="30" stroke="var(--neon-cyan)" stroke-width="1.5" stroke-dasharray="4 3" class="spin-slow" opacity="0.6"/>
+        <circle cx="32" cy="32" r="22" stroke="var(--neon-green)" stroke-width="1.5" opacity="0.8"/>
+        <circle cx="32" cy="32" r="14" stroke="#eab308" stroke-width="1" stroke-dasharray="2 2"/>
+        <rect x="26" y="26" width="12" height="12" rx="3" fill="rgba(0, 229, 255, 0.2)" stroke="var(--neon-cyan)" stroke-width="1.8"/>
+        <circle cx="32" cy="32" r="3" fill="#ffffff"/>
+        <line x1="32" y1="32" x2="54" y2="10" stroke="var(--neon-cyan)" stroke-width="2" stroke-linecap="round" class="radar-sweep"/>
+      </svg>
+    </div>
+    <div class="transition-title" id="transition-title-text">SWITCHING ENGINE...</div>
+    <div class="transition-subtitle" id="transition-sub-text">Connecting telemetry stream and mounting interface...</div>
+    <div class="transition-progress-bar">
+      <div class="transition-progress-fill" id="transition-progress-fill"></div>
+    </div>
+  </div>
 
   <!-- Retro Minimalist Boot & Loading Sequence -->
   <div id="retro-boot-screen" class="retro-boot-overlay">
@@ -98,6 +129,12 @@
         <a href="#terminal" class="nav-btn-action" title="Jump to Interactive CLI Terminal">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
           Terminal CLI
+        </a>
+
+        <!-- Mode Switcher to Live Stream Mode -->
+        <a href="./live.html" class="mode-switch-btn to-live" id="btn-switch-to-live" title="Switch to Live Robot Hardware Telemetry Stream">
+          <span class="pulse-dot"></span>
+          <span>📡 Live Stream Mode</span>
         </a>
       </div>
     </div>

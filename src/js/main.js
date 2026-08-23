@@ -29,6 +29,19 @@ function initRetroBootScreen() {
   const bootScreen = document.getElementById('retro-boot-screen');
   if (!bootScreen) return;
 
+  // If transitioning between modes or already booted in this session, immediately remove boot screen
+  try {
+    if (document.documentElement.classList.contains('skip-boot-screen') || 
+        sessionStorage.getItem('socialnav_skip_boot') === 'true' || 
+        sessionStorage.getItem('socialnav_has_booted') === 'true' || 
+        window.location.search.includes('skip_boot')) {
+      sessionStorage.removeItem('socialnav_skip_boot');
+      bootScreen.remove();
+      return;
+    }
+    sessionStorage.setItem('socialnav_has_booted', 'true');
+  } catch (e) {}
+
   const bar = document.getElementById('boot-progress-bar');
   const percentText = document.getElementById('boot-percent-text');
   const statusText = document.getElementById('boot-status-text');
@@ -821,28 +834,52 @@ function initROS2BridgeControls() {
   }, 100);
 }
 
-// 4.5 Header Brand Logo Click Action (Scroll to Top)
+// 4.5 Header Brand Logo Click Action (Scroll to Top) & Mode Transition
 function initNavbarBrand() {
   const brandLogo = document.querySelector('.nav-brand') || document.getElementById('header-brand-logo');
-  if (!brandLogo) return;
+  if (brandLogo) {
+    const scrollToTop = (e) => {
+      if (e) e.preventDefault();
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
+      if (window.location.hash) {
+        history.pushState('', document.title, window.location.pathname + window.location.search);
+      }
+    };
 
-  const scrollToTop = (e) => {
-    if (e) e.preventDefault();
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'smooth'
+    brandLogo.addEventListener('click', scrollToTop);
+    brandLogo.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        scrollToTop(e);
+      }
     });
-    if (window.location.hash) {
-      history.pushState('', document.title, window.location.pathname + window.location.search);
-    }
-  };
+  }
 
-  brandLogo.addEventListener('click', scrollToTop);
-  brandLogo.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      scrollToTop(e);
+  // Smooth Cyber Transition to Live Stream Mode
+  const btnSwitchToLive = document.getElementById('btn-switch-to-live');
+  btnSwitchToLive?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const overlay = document.getElementById('mode-transition-overlay');
+    const titleEl = document.getElementById('transition-title-text');
+    const subEl = document.getElementById('transition-sub-text');
+    const fillEl = document.getElementById('transition-progress-fill');
+
+    if (!overlay) {
+      window.location.href = './live.html';
+      return;
     }
+
+    if (titleEl) titleEl.textContent = 'SWITCHING TO LIVE ROBOT DECK...';
+    if (subEl) subEl.textContent = 'Connecting ROS2 WebSocket bridge and mounting live hardware sensors...';
+    if (fillEl) fillEl.style.width = '0%';
+
+    overlay.classList.add('active');
+    setTimeout(() => { if (fillEl) fillEl.style.width = '55%'; }, 100);
+    setTimeout(() => { if (fillEl) fillEl.style.width = '100%'; }, 350);
+    setTimeout(() => { window.location.href = './live.html'; }, 600);
   });
 }
 

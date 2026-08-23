@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dracula_vampire">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SocialNav Studio | Live Robot Telemetry &amp; Hardware Stream</title>
+  <meta name="description" content="Real-time Web-based Digital Twin &amp; Hardware Telemetry Deck for ROS2 Social Navigation Robots. Stream LiDAR, Camera FPV, SLAM maps, battery, and Proxemics compliance.">
+  <meta name="theme-color" content="#191a21">
+
+  <!-- Favicon & Browser Icons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" href="/favicon.svg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="./src/styles/main.css">
+  <link rel="stylesheet" href="./src/styles/hud.css">
+  <link rel="stylesheet" href="./src/styles/liveStream.css">
+</head>
+<body>
+
+  <!-- Cyber Mode Transition Screen Overlay -->
+  <div id="mode-transition-overlay" class="mode-transition-overlay">
+    <div class="transition-radar-wrap">
+      <svg width="72" height="72" viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="30" stroke="var(--neon-cyan)" stroke-width="1.5" stroke-dasharray="4 3" class="spin-slow" opacity="0.6"/>
+        <circle cx="32" cy="32" r="22" stroke="var(--neon-green)" stroke-width="1.5" opacity="0.8"/>
+        <circle cx="32" cy="32" r="14" stroke="#eab308" stroke-width="1" stroke-dasharray="2 2"/>
+        <rect x="26" y="26" width="12" height="12" rx="3" fill="rgba(0, 229, 255, 0.2)" stroke="var(--neon-cyan)" stroke-width="1.8"/>
+        <circle cx="32" cy="32" r="3" fill="#ffffff"/>
+        <line x1="32" y1="32" x2="54" y2="10" stroke="var(--neon-cyan)" stroke-width="2" stroke-linecap="round" class="radar-sweep"/>
+      </svg>
+    </div>
+    <div class="transition-title" id="transition-title-text">SWITCHING ENGINE...</div>
+    <div class="transition-subtitle" id="transition-sub-text">Connecting telemetry stream and mounting interface...</div>
+    <div class="transition-progress-bar">
+      <div class="transition-progress-fill" id="transition-progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+  <div class="grid-bg-overlay"></div>
+
+  <!-- Top Header Navbar -->
+  <header class="navbar studio-navbar">
+    <div class="container nav-container">
+      <div class="nav-brand retro-nav-brand" title="SocialNav Studio | Live Robot Telemetry Stream">
+        <div class="brand-icon retro-brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" stroke="var(--neon-cyan)" stroke-width="1.5" stroke-dasharray="3 2" class="spin-slow" opacity="0.8"/>
+            <circle cx="12" cy="12" r="6" stroke="var(--neon-green)" stroke-width="1.5" opacity="0.9"/>
+            <circle cx="12" cy="12" r="2" fill="var(--neon-cyan)"/>
+            <line x1="12" y1="12" x2="19" y2="5" stroke="var(--neon-cyan)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-text-wrap">
+          <span class="brand-main-text">SOCIAL<span style="color: var(--neon-cyan); -webkit-text-fill-color: var(--neon-cyan);">.NAV</span></span>
+          <span class="brand-sub-badge" style="color: var(--neon-cyan);">LIVE HARDWARE INGEST</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Prominent Navbar Mock Stream Button -->
+        <button class="live-btn-mock-neon" id="btn-navbar-mock-stream" title="Toggle realistic simulated live telemetry demo stream">
+          ▶ Demo Mock Stream
+        </button>
+
+        <!-- Live Connection Status Pill -->
+        <div class="live-status-pill disconnected" id="live-bridge-status-pill">
+          <span class="pulse-dot"></span>
+          <span id="live-bridge-status-text">ROS2: DISCONNECTED (ws://localhost:9091)</span>
+        </div>
+
+        <!-- Mode Switcher to Simulation Mode -->
+        <a href="./index.html" class="mode-switch-btn to-sim" id="btn-switch-to-sim" title="Switch back to Web Physics Simulation Studio">
+          <span class="pulse-dot"></span>
+          <span>🎮 Simulation Mode</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="live-stream-container">
+
+    <!-- Top Connection & Layer Toolbar Strip -->
+    <div class="live-top-strip">
+      <div class="live-ws-group">
+        <label for="live-ws-endpoint-input" style="font-family: var(--font-mono); font-size: 11px; color: var(--neon-cyan); font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <span>Robot WebSocket IP:</span>
+        </label>
+        <input type="text" class="live-endpoint-input" id="live-ws-endpoint-input" value="ws://localhost:9091" placeholder="ws://192.168.1.105:9091" autocomplete="off" spellcheck="false" title="Enter Robot IP and port (e.g. ws://192.168.1.105:9091) and press Enter to connect">
+        <button class="live-btn-connect-primary" id="btn-live-ws-connect" title="Connect or Disconnect ROS2 WebSocket Bridge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+          <span>Connect ROS2</span>
+        </button>
+      </div>
+
+      <div class="live-layer-toggles">
+        <!-- 3D Orbit / 2D Map View Mode Switcher -->
+        <button class="live-btn-action" id="btn-view-mode-toggle" title="Toggle between 2D Top-Down Navigation and 3D PointCloud Orbit Perspective" style="border-color: #bb9af7; color: #c084fc; font-weight: 700;">
+          🌐 3D Orbit View
+        </button>
+
+        <!-- SSH Remote Manager Trigger -->
+        <button class="live-btn-action" id="btn-open-ssh-modal" title="Open SSH Remote Robot Manager & Web Terminal Console" style="border-color: #50fa7b; color: #50fa7b; font-weight: 700;">
+          🔑 SSH Remote
+        </button>
+
+        <!-- Smart Topic Mapping Trigger -->
+        <button class="live-btn-action" id="btn-open-topic-remapper" title="View & Configure Smart ROS2 Topic and Type Remapping" style="border-color: #00e5ff; color: #00e5ff; font-weight: 700;">
+          🧭 Topic Mapping
+        </button>
+
+        <!-- Auto-Detect Topics Option Toggle -->
+        <label class="live-toggle-switch-compact" title="Toggle automatic ROS2 topic querying & smart resolver">
+          <input type="checkbox" id="chk-auto-detect-topics-top" checked>
+          <span class="live-toggle-slider"></span>
+          <span class="live-toggle-label">⚡ Auto-Detect</span>
+        </label>
+        
+        <!-- 3D PointCloud Layer Toggle -->
+        <button class="live-btn-action active" id="toggle-layer-pointcloud" title="Toggle 3D LiDAR PointCloud2 Layer" style="border-color: rgba(0, 229, 255, 0.6);">
+          ☁️ PointCloud
+        </button>
+
+        <!-- PointCloud Colormap & Decay Selectors -->
+        <select class="live-select-custom" id="select-pointcloud-colormap" title="PointCloud Color Transformation">
+          <option value="height" selected>🌈 Height Z (Turbo)</option>
+          <option value="intensity">⚡ Intensity</option>
+          <option value="cyan">💎 Cyber Cyan</option>
+        </select>
+
+        <select class="live-select-custom" id="select-pointcloud-decay" title="PointCloud Decay / Persistence Accumulation">
+          <option value="0">Decay: 0s (Instant)</option>
+          <option value="1" selected>Decay: 1.0s</option>
+          <option value="3">Decay: 3.0s</option>
+          <option value="5">Decay: 5.0s (Dense Map)</option>
+        </select>
+
+        <!-- Coordinate Frame Alignment -->
+        <select class="live-select-custom" id="select-pointcloud-frame" title="PointCloud Frame Transformation (Robot Base vs World/Map vs Optical)">
+          <option value="auto" selected>🎯 Frame: Auto</option>
+          <option value="robot">🤖 Local (base_link)</option>
+          <option value="world">🗺️ Global (odom/map)</option>
+          <option value="optical">📷 Optical (ZED/RGBD)</option>
+        </select>
+
+        <button class="live-btn-action active" id="btn-live-autocenter" title="Keep visualizer camera centered on live AMR robot">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
+          Auto-Center
+        </button>
+        <button class="live-btn-action" id="btn-live-navgoal" title="Click and drag on canvas to send 2D Nav Goal to /goal_pose">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+          2D Nav Goal
+        </button>
+        <button class="live-btn-action active" id="toggle-layer-lidar" title="Toggle 2D LiDAR Scan Lines">2D LiDAR</button>
+        <button class="live-btn-action active" id="toggle-layer-map" title="Toggle SLAM OccupancyGrid /map layer">SLAM Map</button>
+        <button class="live-btn-action active" id="toggle-layer-path" title="Toggle Nav2 Global & Local Path">Nav2 Path</button>
+        <button class="live-btn-action active" id="toggle-layer-proxemics" title="Toggle Anisotropic Proxemics Gaussian Ellipses">Proxemics</button>
+        <button class="live-btn-action active" id="toggle-layer-trail" title="Toggle past trajectory trail">Trail</button>
+        <button class="live-btn-action" id="btn-live-cleartrail" title="Clear Visualizer Canvas Screen">🧹 Clear</button>
+      </div>
+    </div>
+
+    <!-- Live Stage & Right Telemetry Deck -->
+    <div class="live-deck-grid">
+      
+      <!-- Central Visualizer Canvas Card -->
+      <div class="live-canvas-card">
+        <div class="live-canvas-header">
+          <div class="live-canvas-title" id="live-canvas-title-text">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            <span>LIVE HARDWARE VISUALIZER (ODOM / 3D POINTCLOUD / PROXEMICS)</span>
+          </div>
+          <div class="live-canvas-tools">
+            <span id="live-estop-alert" style="display: none; color: #ff4444; font-family: var(--font-mono); font-size: 11px; font-weight: 700;">🚨 EMERGENCY STOP ENGAGED!</span>
+          </div>
+        </div>
+
+        <div class="live-viewport-wrap">
+          <canvas id="live-hardware-canvas"></canvas>
+
+          <!-- Awaiting Stream Big Banner -->
+          <div class="live-no-robot-banner" id="live-no-robot-banner">
+            <div style="font-size: 28px;">📡</div>
+            <div style="font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--neon-cyan);">ROS2 Live Stream Ready</div>
+            <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); line-height: 1.5;">
+              Connect your ROS2 robot via <code>ws://localhost:9091</code>, or test with in-browser mock data:
+            </div>
+            <button class="live-btn-mock-neon" id="btn-banner-mock-stream" style="padding: 9px 20px; font-size: 12.5px;">
+              ▶ Launch Demo Mock Stream (LiDAR + Camera)
+            </button>
+          </div>
+
+          <!-- Overlay Cursor Info -->
+          <div class="live-viewport-overlay-info">
+            <span id="live-cursor-coord">X: 0.00m, Y: 0.00m</span>
+            <span>Grid: 1.0m / step | Pan: Mouse Drag | Zoom: Wheel</span>
+          </div>
+
+          <!-- Floating Zoom Controls -->
+          <div class="live-zoom-controls">
+            <button class="live-zoom-btn" id="btn-live-zoom-in" title="Zoom in">+</button>
+            <button class="live-zoom-btn" id="btn-live-zoom-out" title="Zoom out">-</button>
+            <button class="live-zoom-btn" id="btn-live-zoom-reset" title="Reset View" style="font-size: 10px;">1:1</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Telemetry & Sensor Deck Sidebar -->
+      <div class="live-sidebar">
+
+        <!-- 1. Robot FPV Camera Stream -->
+        <div class="live-widget-card">
+          <div class="live-widget-title">
+            <span>📹 FPV Camera Feed</span>
+            <span class="topic-badge-type">/camera/image_raw/compressed</span>
+          </div>
+          <div class="live-camera-feed-wrap">
+            <span class="camera-hud-tag"><span class="camera-rec-dot"></span>LIVE REC</span>
+            <img id="live-camera-img" style="display: none;" alt="Live Robot Camera Feed">
+            <div class="camera-no-signal" id="camera-no-signal-box">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+              <span>Awaiting Camera Stream (/camera/...)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Battery & Power Deck -->
+        <div class="live-widget-card">
+          <div class="live-widget-title">
+            <span>🔋 Power &amp; Battery State</span>
+            <span class="topic-badge-type">/battery_state</span>
+          </div>
+          <div class="battery-gauge-grid">
+            <div class="battery-stat-box">
+              <span class="battery-stat-label">Capacity</span>
+              <span class="battery-stat-val" id="live-battery-pct">88%</span>
+            </div>
+            <div class="battery-stat-box">
+              <span class="battery-stat-label">Voltage</span>
+              <span class="battery-stat-val" id="live-battery-volt">24.2V</span>
+            </div>
+          </div>
+          <div class="battery-progress-track">
+            <div class="battery-progress-bar" id="live-battery-bar"></div>
+          </div>
+        </div>
+
+        <!-- 3. IMU & Kinematics Deck -->
+        <div class="live-widget-card">
+          <div class="live-widget-title">
+            <span>⚡ IMU &amp; Kinematics</span>
+            <span class="topic-badge-type">/imu/data &amp; /odom</span>
+          </div>
+          <div class="kinematics-grid">
+            <div class="kinematics-box">
+              <span class="kinematics-label">Linear (v)</span>
+              <span class="kinematics-val" id="live-kin-v">0.00 m/s</span>
+            </div>
+            <div class="kinematics-box">
+              <span class="kinematics-label">Angular (ω)</span>
+              <span class="kinematics-val" id="live-kin-w">0.00 r/s</span>
+            </div>
+            <div class="kinematics-box">
+              <span class="kinematics-label">Heading (θ)</span>
+              <span class="kinematics-val" id="live-kin-yaw">0.0°</span>
+            </div>
+            <div class="kinematics-box">
+              <span class="kinematics-label">Accel X</span>
+              <span class="kinematics-val" id="live-kin-ax">0.00 m/s²</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Real-World Proxemics Compliance -->
+        <div class="live-widget-card">
+          <div class="live-widget-title">
+            <span>👥 Real-World Proxemics</span>
+            <span class="topic-badge-type">Live Evaluation</span>
+          </div>
+          <div class="kinematics-grid">
+            <div class="kinematics-box">
+              <span class="kinematics-label">Min Distance</span>
+              <span class="kinematics-val" id="live-prox-mindist">-- m</span>
+            </div>
+            <div class="kinematics-box" style="grid-column: span 2;">
+              <span class="kinematics-label">Zone Violations</span>
+              <span class="kinematics-val" id="live-prox-breaches" style="font-size: 11px;">0 Intimate / 0 Personal</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Web Teleop WASD Controller & Emergency Stop -->
+        <div class="live-widget-card">
+          <div class="live-widget-title">
+            <span>🎮 WASD Teleop Controller</span>
+            <span class="topic-badge-type">/cmd_vel</span>
+          </div>
+          <div class="teleop-wasd-wrap">
+            <div class="wasd-pad-grid">
+              <div></div>
+              <button class="wasd-key-btn" id="teleop-key-w" data-key="w" title="Forward (W / Up Arrow)">
+                <span class="wasd-key-char">W</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
+              </button>
+              <div></div>
+
+              <button class="wasd-key-btn" id="teleop-key-a" data-key="a" title="Rotate Left (A / Left Arrow)">
+                <span class="wasd-key-char">A</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              </button>
+              <button class="wasd-key-btn" id="teleop-key-s" data-key="s" title="Backward (S / Down Arrow)">
+                <span class="wasd-key-char">S</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <button class="wasd-key-btn" id="teleop-key-d" data-key="d" title="Rotate Right (D / Right Arrow)">
+                <span class="wasd-key-char">D</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+
+            <div class="wasd-speed-bar">
+              <div class="wasd-speed-item">
+                <span>Linear Speed:</span>
+                <span id="teleop-speed-linear-val" class="wasd-val">0.65 m/s</span>
+              </div>
+              <div class="wasd-speed-item">
+                <span>Angular Speed:</span>
+                <span id="teleop-speed-angular-val" class="wasd-val">1.10 r/s</span>
+              </div>
+            </div>
+
+            <div class="wasd-hint-row">
+              <span>⌨️ Use <strong>W, A, S, D</strong> or arrow keys on your keyboard</span>
+            </div>
+
+            <button class="teleop-e-stop-btn" id="btn-teleop-estop">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              EMERGENCY STOP (SPACE)
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Bottom Deck: ROS2 Topic Inspector -->
+    <div class="live-inspector-card">
+      <div class="inspector-header">
+        <div class="inspector-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          ROS2 TOPIC STREAM INSPECTOR &amp; PACKET MONITOR
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <!-- Auto-Detect Topics Toggle inside Inspector -->
+          <label class="live-toggle-switch-compact" title="Toggle automatic topic detection & resolution">
+            <input type="checkbox" id="chk-auto-detect-topics-inspector" checked>
+            <span class="live-toggle-slider"></span>
+            <span class="live-toggle-label">⚡ Auto-Detect Topics</span>
+          </label>
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">Real-Time Topic Registry</span>
+        </div>
+      </div>
+
+      <!-- Manual Topic Insertion & Subscription Bar -->
+      <div class="inspector-add-strip">
+        <div class="inspector-add-inputs">
+          <label for="input-custom-topic-name" class="inspector-add-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Custom Topic:</span>
+          </label>
+          <input type="text" class="inspector-input-topic" id="input-custom-topic-name" placeholder="e.g. /livox/lidar or /zed/point_cloud/cloud_registered" autocomplete="off" spellcheck="false">
+          <select class="inspector-select-role" id="select-custom-topic-role" title="Select which Visualizer Role to map this topic into">
+            <option value="pointCloud">☁️ 3D PointCloud (Livox/ZED/LiDAR)</option>
+            <option value="laserScan">📡 2D LiDAR Scan (/scan)</option>
+            <option value="robotOdom">🚗 Robot Odometry &amp; Pose</option>
+            <option value="cameraCompressed">📷 FPV Camera Feed</option>
+            <option value="trackedHumans">🚶 Tracked Humans / ZED AI</option>
+            <option value="map">🗺️ SLAM Occupancy Map</option>
+            <option value="globalPlan">🚩 Nav2 Global Plan</option>
+            <option value="imu">🧭 IMU Sensor</option>
+            <option value="custom">⚡ General Monitor (Inspect Only)</option>
+          </select>
+          <button class="live-btn-action" id="btn-add-custom-topic" title="Subscribe to custom topic and bind to visualizer" style="border-color: var(--neon-green); color: var(--neon-green); font-weight: 700;">
+            + Add &amp; Subscribe Topic
+          </button>
+        </div>
+      </div>
+
+      <div class="topic-table-wrap">
+        <table class="topic-table">
+          <thead>
+            <tr>
+              <th>ROS2 Topic Name</th>
+              <th>Visualizer Role / Type</th>
+              <th>Frequency (Hz)</th>
+              <th>Total Packets</th>
+              <th>Payload Size</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="live-topics-tbody">
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">Connecting to ROS2 bridge...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal JSON Payload Drawer -->
+  <div id="payload-drawer-modal" class="modal-backdrop" style="display: none; align-items: center; justify-content: center;">
+    <div class="modal-dialog" style="max-width: 650px; width: 90%;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <h4 id="payload-drawer-topic-name" style="color: var(--neon-cyan); margin: 0; font-family: var(--font-mono); font-size: 13px;">Topic Payload</h4>
+        <button class="modal-close-btn" id="btn-close-payload-drawer" style="position: static;">✕</button>
+      </div>
+      <div class="payload-drawer-content" id="payload-drawer-code">
+        // Payload content will be rendered here
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: SSH Remote Interactive Terminal & Robot Controller Window -->
+  <div id="ssh-manager-modal" class="modal-backdrop">
+    <div class="modal-dialog ssh-terminal-window-dialog" id="ssh-terminal-window">
+      
+      <!-- 1. Window Header Bar -->
+      <div class="ssh-win-header">
+        <div class="ssh-win-left">
+          <div class="ssh-win-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+            <span>SSH Remote Terminal</span>
+          </div>
+
+          <!-- Target Profile Dropdown & Status -->
+          <div class="ssh-host-picker-wrap">
+            <select class="ssh-select-host-compact" id="ssh-profile-select"></select>
+            <span class="ssh-session-pill inactive" id="ssh-session-status-pill">IDLE</span>
+          </div>
+        </div>
+
+        <div class="ssh-win-actions">
+          <button class="ssh-btn-header" id="btn-ssh-test-probe" title="Ping remote host to test connection & latency">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            <span>🧪 Test Connection</span>
+          </button>
+
+          <button class="ssh-btn-header-primary" id="btn-ssh-launch-bridge" title="Launch remote rosbridge_server and establish stream tunnel">
+            🚀 Launch ROS2 Bridge
+          </button>
+
+          <button class="ssh-btn-header" id="btn-ssh-toggle-settings" title="Edit connection credentials, ports and ROS2 environment">
+            ⚙️ Settings
+          </button>
+
+          <button class="ssh-btn-header" id="btn-ssh-toggle-maximize" title="Toggle Fullscreen / Windowed Mode">
+            ⛶
+          </button>
+
+          <button class="modal-close-btn" id="btn-close-ssh-modal" style="position: static;" title="Close Terminal">✕</button>
+        </div>
+      </div>
+
+      <!-- 2. Collapsible Settings Drawer (Hidden by default) -->
+      <div class="ssh-settings-drawer" id="ssh-settings-drawer" style="display: none;">
+        <div class="ssh-drawer-content">
+          <div class="ssh-drawer-header">
+            <span>⚙️ Remote Host &amp; ROS2 Environment Configuration</span>
+            <div style="display: flex; gap: 8px;">
+              <button class="ssh-btn-xs" id="btn-ssh-drawer-test-probe" style="background: rgba(0, 229, 255, 0.15); border-color: #00e5ff; color: #00e5ff;">🧪 Test Connection</button>
+              <button class="ssh-btn-xs" id="btn-ssh-save-profile">💾 Save Profile</button>
+              <button class="ssh-btn-xs danger" id="btn-ssh-delete-profile">🗑️ Delete</button>
+            </div>
+          </div>
+
+          <div class="ssh-form-grid-4">
+            <div class="ssh-form-group">
+              <label class="ssh-form-label">Profile Name:</label>
+              <input type="text" class="ssh-input-styled" id="ssh-input-name" placeholder="Lab Jackal AMR">
+            </div>
+            <div class="ssh-form-group">
+              <label class="ssh-form-label">Host IP / Domain:</label>
+              <input type="text" class="ssh-input-styled" id="ssh-input-host" placeholder="192.168.1.105">
+            </div>
+            <div class="ssh-form-group">
+              <label class="ssh-form-label">SSH Port:</label>
+              <input type="number" class="ssh-input-styled" id="ssh-input-port" value="22">
+            </div>
+            <div class="ssh-form-group">
+              <label class="ssh-form-label">Username:</label>
+              <input type="text" class="ssh-input-styled" id="ssh-input-user" placeholder="robot / ubuntu">
+            </div>
+          </div>
+
+          <div class="ssh-form-grid-3">
+            <div class="ssh-form-group">
+              <label class="ssh-form-label">Auth Method:</label>
+              <select class="ssh-select-styled" id="ssh-input-auth-mode">
+                <option value="password" selected>Password</option>
+                <option value="key">SSH Private Key</option>
+              </select>
+            </div>
+            <div class="ssh-form-group" id="ssh-wrap-password" style="grid-column: span 2;">
+              <label class="ssh-form-label">SSH Password:</label>
+              <input type="password" class="ssh-input-styled" id="ssh-input-password" placeholder="Enter password...">
+            </div>
+            <div class="ssh-form-group" id="ssh-wrap-key" style="display: none; grid-column: span 2;">
+              <label class="ssh-form-label">Private Key Path:</label>
+              <input type="text" class="ssh-input-styled" id="ssh-input-key-path" placeholder="~/.ssh/id_rsa">
+            </div>
+          </div>
+
+          <div class="ssh-form-grid-3">
+            <div class="ssh-form-group">
+              <label class="ssh-form-label">ROS2 Distro:</label>
+              <select class="ssh-select-styled" id="ssh-input-distro">
+                <option value="humble" selected>Humble (LTS)</option>
+                <option value="iron">Iron</option>
+                <option value="jazzy">Jazzy (LTS)</option>
+                <option value="foxy">Foxy</option>
+              </select>
+            </div>
+            <div class="ssh-form-group" style="grid-column: span 2;">
+              <label class="ssh-form-label">Setup Script:</label>
+              <input type="text" class="ssh-input-styled" id="ssh-input-setup" value="/opt/ros/humble/setup.bash">
+            </div>
+          </div>
+
+          <div class="ssh-form-grid-3">
+            <div class="ssh-form-group">
+              <label class="ssh-form-label">Launch Preset:</label>
+              <select class="ssh-select-styled" id="ssh-input-preset">
+                <option value="rosbridge" selected>🚀 rosbridge_server (:9091)</option>
+                <option value="publisher">📡 Telemetry Publisher</option>
+                <option value="custom">⚙️ Custom Command</option>
+              </select>
+            </div>
+            <div class="ssh-form-group" id="ssh-wrap-custom-cmd" style="display: none; grid-column: span 2;">
+              <label class="ssh-form-label">Custom Command:</label>
+              <input type="text" class="ssh-input-styled" id="ssh-input-custom-cmd" placeholder="ros2 launch ...">
+            </div>
+            <div class="ssh-cb-row" style="align-self: center;">
+              <input type="checkbox" id="ssh-cb-auto-tunnel" checked>
+              <label for="ssh-cb-auto-tunnel">SSH Port Forward Tunnel (<code>9091</code>)</label>
+            </div>
+          </div>
+
+          <div id="ssh-probe-result" class="ssh-probe-box" style="display: none;"></div>
+        </div>
+      </div>
+
+      <!-- 3. Quick Action Chips Bar -->
+      <div class="ssh-terminal-chips-bar">
+        <span class="ssh-chips-label">Actions:</span>
+        <button class="ssh-quick-chip" id="btn-ssh-ctrl-c" style="border-color: #ff5555; color: #ff5555; font-weight: 700;">🛑 Ctrl+C</button>
+        <button class="ssh-quick-chip" id="btn-ssh-chip-test-probe" style="border-color: #00ff9d; color: #00ff9d; font-weight: 700;">🧪 Test Connection</button>
+        <button class="ssh-quick-chip" data-action="discover" style="border-color: #00e5ff; color: #00e5ff; font-weight: 700;">🧭 Auto-Discover Topics</button>
+        <button class="ssh-quick-chip" data-cmd="ros2 topic list -t">ros2 topic list -t</button>
+        <button class="ssh-quick-chip" data-cmd="ros2 node list">ros2 node list</button>
+        <button class="ssh-quick-chip" data-cmd="ros2 topic hz /livox/lidar">hz /livox/lidar</button>
+        <button class="ssh-quick-chip" data-cmd="ros2 topic hz /zed/zed_node/rgb/image_rect_color/compressed">hz /zed/image</button>
+        <button class="ssh-quick-chip" data-cmd="ros2 topic hz /scan">hz /scan</button>
+        <button class="ssh-quick-chip" data-cmd="ros2 topic echo /odom -n 1">echo /odom</button>
+        <button class="ssh-quick-chip" data-cmd="ros2 doctor">ros2 doctor</button>
+        <button class="ssh-quick-chip" data-cmd="free -h &amp;&amp; df -h /">free -h</button>
+        <button class="ssh-quick-chip" id="btn-ssh-copy-logs" title="Copy entire terminal output to clipboard">📋 Copy</button>
+        <button class="ssh-quick-chip clear" id="btn-ssh-clear-terminal">🧹 Clear</button>
+        
+        <div class="ssh-daemon-pill offline" id="ssh-daemon-status-badge" style="margin-left: auto;">
+          <span class="pulse-dot"></span> Daemon: Checking...
+        </div>
+      </div>
+
+      <!-- 4. Interactive Terminal Output Screen -->
+      <div class="ssh-terminal-body" id="ssh-terminal-logs">
+        <div class="term-line" style="color: #6272a4;">// 🤖 SocialNav Studio — Interactive Remote SSH Real-Time Terminal Console</div>
+        <div class="term-line" style="color: #6272a4;">// Connected to local SSH Daemon (ws://localhost:9092)</div>
+        <div class="term-line" style="color: #50fa7b;">// Select a robot host above and type any command to interact in real-time.</div>
+      </div>
+
+      <!-- 5. Interactive Terminal Command Prompt Input -->
+      <div class="ssh-terminal-cli-wrap">
+        <span class="ssh-term-user-host" id="ssh-term-prompt-label">robot@remote:~$</span>
+        <input type="text" class="ssh-terminal-cli-input" id="ssh-terminal-input" placeholder="Type command (e.g. ros2 topic list, htop, ls -la) and press Enter..." autocomplete="off" spellcheck="false">
+        <button class="ssh-btn-xs" id="btn-ssh-cli-interrupt" style="background: rgba(255, 85, 85, 0.18); border-color: #ff5555; color: #ff5555; font-weight: 700;" title="Send Ctrl+C to stop running command">🛑 Ctrl+C</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Floating Theme Picker (Bottom-Right) -->
+  <div class="theme-customizer-container" id="theme-customizer-container">
+    <div class="theme-popover" id="theme-popover">
+      <div class="theme-popover-header">
+        <div class="theme-popover-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"></path></svg>
+          Studio Visual Themes
+        </div>
+        <button class="btn-close-popover" id="btn-close-theme-popover" aria-label="Close">✕</button>
+      </div>
+
+      <div class="theme-grid-list">
+        <button class="theme-option-btn" data-theme="dracula_vampire">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #191A21;"></span>
+            <span class="theme-swatch" style="background: #50FA7B;"></span>
+            <span class="theme-swatch" style="background: #8BE9FD;"></span>
+          </div>
+          <div class="theme-info"><span class="theme-name">Dracula Pro</span></div>
+        </button>
+        <button class="theme-option-btn" data-theme="tokyo">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #1a1b26;"></span>
+            <span class="theme-swatch" style="background: #7aa2f7;"></span>
+            <span class="theme-swatch" style="background: #bb9af7;"></span>
+          </div>
+          <div class="theme-info"><span class="theme-name">Tokyo Cyber</span></div>
+        </button>
+        <button class="theme-option-btn" data-theme="obsidian">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #0b0f14;"></span>
+            <span class="theme-swatch" style="background: #00ff9d;"></span>
+            <span class="theme-swatch" style="background: #00e5ff;"></span>
+          </div>
+          <div class="theme-info"><span class="theme-name">Obsidian Matrix</span></div>
+        </button>
+        <button class="theme-option-btn" data-theme="cyberpunk_neon">
+          <div class="theme-swatch-row">
+            <span class="theme-swatch" style="background: #0d0221;"></span>
+            <span class="theme-swatch" style="background: #00f0ff;"></span>
+            <span class="theme-swatch" style="background: #ff003c;"></span>
+          </div>
+          <div class="theme-info"><span class="theme-name">Cyberpunk 2077</span></div>
+        </button>
+      </div>
+    </div>
+
+    <button class="theme-fab-btn" id="theme-fab-btn" title="Change Studio Theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+        <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+        <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+        <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+      </svg>
+      <span class="theme-fab-badge" id="theme-active-badge">Theme</span>
+    </button>
+  </div>
+
+  <!-- Smart ROS2 Topic Remapper Modal -->
+  <div class="modal-backdrop" id="topic-remapper-modal">
+    <div class="modal-dialog topic-remapper-dialog">
+      <button class="modal-close-btn" id="btn-close-topic-remapper" title="Close Topic Remapper">✕</button>
+
+      <div class="topic-remapper-header">
+        <div class="topic-header-title-wrap">
+          <span class="topic-header-tag">🧭 INTEL ENGINE</span>
+          <h2 class="topic-header-title">Smart ROS2 Topic & Type Remapper</h2>
+          <p class="topic-header-desc">
+            Tự động truy cứu kiểu dữ liệu (Message Types) từ Robot qua <code>/rosapi</code> hoặc SSH và ánh xạ tự động vào bộ visualizer.
+          </p>
+        </div>
+        <div class="topic-header-actions">
+          <button class="live-btn-action" id="btn-rescan-topics" style="border-color: var(--neon-cyan); color: var(--neon-cyan); font-weight: 700;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            Re-Scan Robot Topics
+          </button>
+        </div>
+      </div>
+
+      <div class="topic-remapper-stats-bar">
+        <div class="topic-stat-badge">
+          <span class="pulse-dot"></span>
+          <span>Detected Topics: <strong id="remapper-total-count" style="color: var(--neon-cyan);">0</strong></span>
+        </div>
+        <div class="topic-stat-badge">
+          <span>Auto-Mapped: <strong id="remapper-mapped-count" style="color: var(--neon-green);">0 / 9</strong></span>
+        </div>
+        <div class="topic-stat-badge">
+          <span>Status: <span id="remapper-status-text" style="color: var(--neon-cyan);">Ready</span></span>
+        </div>
+      </div>
+
+      <!-- Remapper Table / Grid -->
+      <div class="topic-remapper-grid" id="topic-remapper-grid">
+        <!-- Injected dynamically via Javascript -->
+      </div>
+
+      <!-- Discovered Raw Topics Drawer -->
+      <details class="topic-raw-list-details">
+        <summary class="topic-raw-summary">
+          <span>🔍 View All Detected Robot Topics (<span id="remapper-raw-count">0</span>)</span>
+        </summary>
+        <div class="topic-raw-table-wrap">
+          <table class="topic-raw-table">
+            <thead>
+              <tr>
+                <th>Topic Name</th>
+                <th>Message Type</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="remapper-raw-table-body">
+              <tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 12px;">No topics scanned yet. Connect to Robot or click Re-Scan.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="./src/js/liveStream.js"></script>
+</body>
+</html>

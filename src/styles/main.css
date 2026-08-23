@@ -1483,6 +1483,13 @@ h1, h2, h3, h4, h5, h6 {
   transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+html.skip-boot-screen #retro-boot-screen,
+.skip-boot-screen #retro-boot-screen,
+html.skip-boot-screen .retro-boot-overlay,
+.skip-boot-screen .retro-boot-overlay {
+  display: none !important;
+}
+
 .retro-boot-overlay.fade-out {
   opacity: 0;
   transform: scale(1.05);
