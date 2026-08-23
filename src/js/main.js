@@ -11,6 +11,7 @@ let simulator = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   window.scrollTo(0, 0);
+  initNavBrandLogoReload();
   initRetroBootScreen();
   initBackgroundCanvas();
   initMouseGlow();
@@ -21,6 +22,17 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheoryModal();
   initThemeSwitcher();
 });
+
+// Attach page reload handler to header brand logo
+function initNavBrandLogoReload() {
+  const brandLogos = document.querySelectorAll('.nav-brand, #nav-brand-logo');
+  brandLogos.forEach(logo => {
+    logo.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.reload();
+    });
+  });
+}
 
 // 0. Retro Minimalist Boot Sequence
 function initRetroBootScreen() {
