@@ -11,10 +11,10 @@ let simulator = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   window.scrollTo(0, 0);
-  initNavBrandLogoReload();
   initRetroBootScreen();
   initBackgroundCanvas();
   initMouseGlow();
+  initNavbarBrand();
   initSimulatorSuite();
   telemetryAnalytics.init();
   initROS2BridgeControls();
@@ -22,17 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheoryModal();
   initThemeSwitcher();
 });
-
-// Attach page reload handler to header brand logo
-function initNavBrandLogoReload() {
-  const brandLogos = document.querySelectorAll('.nav-brand, #nav-brand-logo');
-  brandLogos.forEach(logo => {
-    logo.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.location.reload();
-    });
-  });
-}
 
 // 0. Retro Minimalist Boot Sequence
 function initRetroBootScreen() {
@@ -830,6 +819,31 @@ function initROS2BridgeControls() {
       }
     }
   }, 100);
+}
+
+// 4.5 Header Brand Logo Click Action (Scroll to Top)
+function initNavbarBrand() {
+  const brandLogo = document.querySelector('.nav-brand') || document.getElementById('header-brand-logo');
+  if (!brandLogo) return;
+
+  const scrollToTop = (e) => {
+    if (e) e.preventDefault();
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+    if (window.location.hash) {
+      history.pushState('', document.title, window.location.pathname + window.location.search);
+    }
+  };
+
+  brandLogo.addEventListener('click', scrollToTop);
+  brandLogo.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      scrollToTop(e);
+    }
+  });
 }
 
 // 5. Theory & Math Modal
