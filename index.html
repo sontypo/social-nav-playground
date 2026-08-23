@@ -812,13 +812,16 @@
             <div class="cli-guide-card">
               <div class="cli-guide-card-title ai">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 3.3 2 6.1 4.9 7.3V19a2 2 0 0 0 2 2h2.2a2 2 0 0 0 2-2v-1.7A8 8 0 0 0 12 2z"></path><path d="M9 22h6"></path></svg>
-                AI Robotics Assistant (Zero-API)
+                AI Robotics Assistant (Multi-Backend)
               </div>
               <ul class="cli-guide-list">
                 <li><code>ai &lt;question&gt;</code>: Inquire about Proxemics, algorithms, or physics</li>
+                <li><code>ai key &lt;API_KEY&gt;</code>: Connect Google Gemini API (Unscripted LLM)</li>
+                <li><code>ai provider &lt;gemini|ollama|nano|local&gt;</code>: Switch AI Core</li>
+                <li><code>ai model &lt;name&gt;</code>: Configure model (e.g., gemini-2.5-flash, llama3)</li>
                 <li><code>ai analyze</code>: Evaluate real-time scene safety &amp; get recommendations</li>
-                <li><code>ai status</code>: Inspect active AI Core engine &amp; privacy metrics</li>
-                <li><code>ai why did robot slow down?</code>: Diagnose physical velocity reductions</li>
+                <li><code>ai status</code>: Inspect active AI Core, API key, &amp; memory stats</li>
+                <li><code>ai clear</code>: Reset multi-turn conversation memory buffer</li>
               </ul>
             </div>
 
@@ -843,11 +846,13 @@
             <div class="cli-guide-card">
               <div class="cli-guide-card-title ros">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
-                ROS2 Ecosystem &amp; Topics
+                ROS2 Ecosystem &amp; 3D Export
               </div>
               <ul class="cli-guide-list">
-                <li><code>ros2 topic list</code>: List active topics (/scan, /odom, /social_costmap)</li>
-                <li><code>ros2 topic echo &lt;topic&gt;</code>: Stream one live sensor_msgs payload frame</li>
+                <li><code>ros2 topic list</code>: List active topics (/scan, /odom, /social_costmap, /tracked_humans)</li>
+                <li><code>ros2 topic echo &lt;topic&gt;</code>: Stream live sensor_msgs / nav_msgs payload frame</li>
+                <li><code>export world</code>: Generate 3D Gazebo Classic 11 (.world) model</li>
+                <li><code>export sdf</code>: Generate 3D Ignition Gazebo (.sdf) model</li>
               </ul>
             </div>
 
@@ -861,7 +866,7 @@
                 <li><code>analytics stats</code>: Inspect compliance metrics &amp; violations summary</li>
                 <li><code>analytics csv</code> | <code>analytics json</code>: Export research trial logs</li>
                 <li><code>theory &lt;proxemics|algo|benchmarks|datasets&gt;</code>: Open math formulations</li>
-                <li><code>theme &lt;obsidian|tokyo|apollo|emerald|light|...&gt;</code>: Switch studio theme</li>
+                <li><code>theme &lt;dracula|obsidian|tokyo|apollo|emerald|light|...&gt;</code>: Switch studio theme</li>
                 <li><code>clear</code>: Clear terminal screen | <kbd>↑</kbd>/<kbd>↓</kbd>: Navigate command history</li>
               </ul>
             </div>

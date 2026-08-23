@@ -206,12 +206,16 @@ if (dist < robot_radius + human_radius + safety_margin) {
   ],
 
   terminalHelp: `Available Terminal Commands:
-  • <span class="term-highlight">ai &lt;question&gt;</span>                                    : Ask AI Robotics Assistant (Zero-API: Gemini Nano / Local Expert)
+  • <span class="term-highlight">ai &lt;question&gt;</span>                                    : Ask AI Robotics Assistant (Unscripted LLM / Multi-Backend)
+  • <span class="term-highlight">ai key &lt;API_KEY&gt;</span>                                    : Connect Google Gemini Generative AI (Free key from aistudio.google.com)
+  • <span class="term-highlight">ai provider &lt;gemini|ollama|nano|local&gt;</span>              : Switch active AI Core engine
+  • <span class="term-highlight">ai model &lt;model_name&gt;</span>                               : Configure model (e.g. gemini-2.5-flash, llama3, deepseek-r1)
   • <span class="term-highlight">ai analyze</span>                                          : Real-time telemetry evaluation & navigation recommendations
-  • <span class="term-highlight">ai status</span>                                           : Show active AI Core & privacy metrics
-  • <span class="term-highlight">sim algo &lt;sfm|sarl|cadrl|mpc|orca|nonsocial&gt;</span> : Switch active motion planning algorithm
-  • <span class="term-highlight">sim scenario &lt;name&gt;</span>                            : Load benchmark scenario (e.g. eth_univ, jrdb_quad, scand_plaza, thor_mocap, atc_mall, ucy_zara, etc.)
-  • <span class="term-highlight">sim peds &lt;count&gt;</span>                                  : Set pedestrian crowd density (2 - 20)
+  • <span class="term-highlight">ai status</span>                                           : Show active AI Core, API key, & memory buffer stats
+  • <span class="term-highlight">ai clear</span>                                            : Reset multi-turn conversation memory
+  • <span class="term-highlight">sim algo &lt;sfm|sarl|cadrl|mpc|orca|nonsocial&gt;</span>        : Switch active motion planning algorithm
+  • <span class="term-highlight">sim scenario &lt;name&gt;</span>                                 : Load benchmark scenario (eth_univ, jrdb_quad, scand_plaza, ucy_zara, etc.)
+  • <span class="term-highlight">sim peds &lt;count&gt;</span>                                    : Set pedestrian crowd density (2 - 20)
   • <span class="term-highlight">sim speed &lt;m/s&gt;</span>                                    : Set robot maximum speed (0.4 - 3.0 m/s)
   • <span class="term-highlight">sim courtesy &lt;0.1 - 2.0&gt;</span>                           : Set yielding / social courtesy weight
   • <span class="term-highlight">sim spawn &lt;x&gt; &lt;y&gt;</span>                                  : Spawn human at coordinate (e.g. sim spawn 300 200)
@@ -219,11 +223,13 @@ if (dist < robot_radius + human_radius + safety_margin) {
   • <span class="term-highlight">sim pause</span> | <span class="term-highlight">sim resume</span> | <span class="term-highlight">sim reset</span>    : Control simulation execution
   • <span class="term-highlight">sim lidar &lt;on|off|rays N|range M|fov D&gt;</span>            : Toggle & configure LiDAR (e.g. sim lidar rays 180, sim lidar fov 270)
   • <span class="term-highlight">sim heatmap &lt;on|off&gt;</span>                               : Toggle Hall's Proxemics Gaussian heatmap
+  • <span class="term-highlight">sim costmap &lt;on|off&gt;</span>                               : Toggle 2D dynamic social costmap layer
   • <span class="term-highlight">sim status</span>                                          : Show live simulation telemetry & metrics
-  • <span class="term-highlight">ros2 topic list</span>                                     : List all active ROS2 published topics
+  • <span class="term-highlight">ros2 topic list</span>                                     : List all active ROS2 published topics (/scan, /odom, /social_costmap, /tracked_humans)
   • <span class="term-highlight">ros2 topic echo &lt;topic&gt;</span>                             : Stream one frame of ROS2 topic data
+  • <span class="term-highlight">export world</span> | <span class="term-highlight">export sdf</span>                    : Export 3D Gazebo Classic 11 (.world) or Ignition Gazebo (.sdf)
   • <span class="term-highlight">theory &lt;algo|proxemics|benchmarks|datasets&gt;</span>         : View mathematical formulations & public datasets
   • <span class="term-highlight">analytics &lt;stats|pause|resume|clear|csv|json&gt;</span>       : Inspect telemetry statistics & export CSV/JSON logs
-  • <span class="term-highlight">theme &lt;theme_id&gt;</span>                                  : Switch UI studio theme (tokyo, obsidian, solar_light, etc.)
+  • <span class="term-highlight">theme &lt;theme_id&gt;</span>                                  : Switch UI studio theme (dracula, tokyo, obsidian, solar_light, etc.)
   • <span class="term-highlight">clear</span>                                               : Clear terminal screen output`
 };
